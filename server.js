@@ -30,16 +30,13 @@ const upload = multer({
 });
 
 // ==================================================
-// DAILY LIMIT
-// NORMAL STUDENTS = 20 QUESTIONS
-// FULL ACCESS = UNLIMITED APP ACCESS
+// SETTINGS
 // ==================================================
 
 const dailyUsage = new Map();
 
 const FREE_LIMIT = 20;
 
-// Render Environment Variable
 const FULL_ACCESS_CODE =
   process.env.FULL_ACCESS_CODE || "";
 
@@ -92,11 +89,29 @@ function getUsage(req) {
   const key = ip + "_" + today;
 
   return {
-    ip,
-    today,
     key,
     used: dailyUsage.get(key) || 0
   };
+
+}
+
+// ==================================================
+// COOKIE MODE
+// ==================================================
+
+function getAccessMode(req) {
+
+  const cookie =
+    req.headers.cookie || "";
+
+  const match =
+    cookie.match(
+      /(?:^|;\s*)access_mode=([^;]+)/
+    );
+
+  return match
+    ? decodeURIComponent(match[1])
+    : "limited";
 
 }
 
@@ -106,41 +121,58 @@ function getUsage(req) {
 
 function cleanAnswer(text) {
 
-  let answer = String(text || "");
+  let answer =
+    String(text || "");
 
-  // Remove <think>...</think>
-  answer = answer.replace(
-    /<think>[\s\S]*?<\/think>/gi,
-    ""
-  );
+  answer =
+    answer.replace(
+      /<think>[\s\S]*?<\/think>/gi,
+      ""
+    );
 
-  // Remove accidental unmatched <think>
-  answer = answer.replace(
-    /<think>[\s\S]*/gi,
-    ""
-  );
+  answer =
+    answer.replace(
+      /<think>[\s\S]*/gi,
+      ""
+    );
 
-  // Remove accidental closing tag
-  answer = answer.replace(
-    /<\/think>/gi,
-    ""
-  );
-
-  // Remove common internal AI headings if they appear
-  answer = answer.replace(
-    /^\s*(Final Answer|Final Plan|Analysis|Reasoning|Thoughts)\s*:?\s*/i,
-    ""
-  );
+  answer =
+    answer.replace(
+      /<\/think>/gi,
+      ""
+    );
 
   return answer.trim();
 
 }
 
 // ==================================================
-// WEBSITE
+// LIMITED WEBSITE
 // ==================================================
 
 app.get("/", (req, res) => {
+
+  res.setHeader(
+    "Set-Cookie",
+    "access_mode=limited; Path=/; HttpOnly; SameSite=Lax"
+  );
+
+  res.sendFile(
+    path.join(process.cwd(), "index.html")
+  );
+
+});
+
+// ==================================================
+// FULL ACCESS WEBSITE
+// ==================================================
+
+app.get("/full", (req, res) => {
+
+  res.setHeader(
+    "Set-Cookie",
+    "access_mode=full; Path=/; HttpOnly; SameSite=Lax"
+  );
 
   res.sendFile(
     path.join(process.cwd(), "index.html")
@@ -198,7 +230,7 @@ app.post(
       }
 
       // ==================================================
-      // QUESTION
+      // REQUEST DATA
       // ==================================================
 
       const question =
@@ -208,29 +240,36 @@ app.post(
         (req.body.subject || "અન્ય").trim();
 
       const marks =
-        (req.body.marks || "board").trim();
-
-      // ==================================================
-      // FULL ACCESS CODE
-      // ==================================================
+        (req.body.marks || "વિગતવાર સમજણ").trim();
 
       const accessCode =
         (
+          req.body.fullAccessCode ||
           req.body.accessCode ||
-          req.body.access ||
           ""
         ).trim();
 
-      const hasFullAccess =
-        !!(
-          FULL_ACCESS_CODE &&
-          accessCode === FULL_ACCESS_CODE
-        );
-
-      const file = req.file;
+      const file =
+        req.file;
 
       // ==================================================
-      // QUESTION / IMAGE VALIDATION
+      // PAGE MODE
+      // ==================================================
+
+      const accessMode =
+        getAccessMode(req);
+
+      // Full access ONLY when:
+      // 1. User is on /full
+      // 2. Correct Full Access Code is entered
+
+      const hasFullAccess =
+        accessMode === "full" &&
+        FULL_ACCESS_CODE &&
+        accessCode === FULL_ACCESS_CODE;
+
+      // ==================================================
+      // QUESTION VALIDATION
       // ==================================================
 
       if (!question && !file) {
@@ -267,7 +306,7 @@ app.post(
       }
 
       // ==================================================
-      // FREE LIMIT
+      // NORMAL USER LIMIT
       // ==================================================
 
       const usage =
@@ -305,181 +344,145 @@ app.post(
       }
 
       // ==================================================
-      // MASTER GSEB STUDY PROMPT
+      // GSEB MASTER PROMPT
       // ==================================================
 
       const prompt = `
 
-તમે Gujarat Secondary and Higher Secondary Education Board (GSEB)
-ધોરણ 10ના અનુભવી શિક્ષક અને Study Helper છો.
+તમે GSEB ધોરણ 10ના અનુભવી શિક્ષક અને Study Helper છો.
 
 વિષય: ${subject}
 
 જવાબનું સ્તર: ${marks}
 
 
-==================================================
-સૌથી મહત્વના OUTPUT RULES
-==================================================
+==============================
+ખૂબ મહત્વના OUTPUT RULES
+==============================
 
-1) વિદ્યાર્થીને માત્ર FINAL ANSWER બતાવવો.
+1) વિદ્યાર્થીને માત્ર final answer બતાવો.
 
-2) ક્યારેય <think>, </think>, internal thinking,
-analysis, reasoning, planning અથવા modelની અંદરની વિચાર પ્રક્રિયા
-વિદ્યાર્થીને બતાવવી નહીં.
+2) <think>, </think>, internal thinking, analysis,
+reasoning, planning અથવા AIની અંદરની વિચાર પ્રક્રિયા
+ક્યારેય બતાવશો નહીં.
 
-3) "The user...", "Let's solve...", "I think...",
-"Wait...", "Actually...", "Final Plan...",
-"Analysis..." જેવી AIની અંદરની ભાષા outputમાં ક્યારેય ન આપવી.
+3) "The user", "Let's solve", "I think",
+"Wait", "Actually", "Analysis", "Final Plan"
+જેવી AIની અંદરની ભાષા ન આપવી.
 
-4) જવાબ સરળ, સ્વાભાવિક અને સંપૂર્ણ ગુજરાતી ભાષામાં આપવો.
+4) જવાબ સરળ, સ્વાભાવિક ગુજરાતી ભાષામાં આપવો.
 
-5) English sentence અથવા English paragraph ન લખવો.
+5) English sentence અથવા English paragraph ન આપવો.
 
-6) માત્ર જરૂરી technical terms, mathematical symbols,
-formulas, units અને standard scientific notation Englishમાં
-રાખી શકાય.
+6) જરૂરી technical શબ્દો, formulas, mathematical symbols
+અને scientific units English/standard notationમાં રાખી શકાય.
 
-7) જવાબ ધોરણ 10ના ગુજરાતી માધ્યમના વિદ્યાર્થીને સરળતાથી સમજાય
-એવી ભાષામાં હોવો જોઈએ.
+7) ધોરણ 10ના વિદ્યાર્થીને સરળતાથી સમજાય એવી ભાષા વાપરો.
 
-8) ફોટામાં પ્રશ્ન હોય તો ફોટો ધ્યાનથી વાંચવો.
+8) ફોટામાં પ્રશ્ન હોય તો પહેલાં ફોટો ધ્યાનથી વાંચો.
 
-9) ફોટામાં એકથી વધુ પ્રશ્ન / sub-question દેખાય તો
-પ્રશ્નોને યોગ્ય ક્રમમાં ઓળખવા અને શક્ય હોય તેટલા બધા
-સ્પષ્ટ દેખાતા પ્રશ્નોના જવાબ આપવા.
+9) ફોટામાં એકથી વધુ સ્પષ્ટ પ્રશ્નો હોય તો બધા પ્રશ્નોને
+યોગ્ય ક્રમમાં ઓળખીને જવાબ આપો.
 
-10) પોતાની તરફથી પ્રશ્ન પસંદ કરીને બીજા દેખાતા પ્રશ્નોને
-છોડી દેવા નહીં.
+10) અસ્પષ્ટ ભાગ હોય તો અંદાજથી જવાબ ન બનાવવો.
 
-11) જો ફોટાનો કોઈ ભાગ અસ્પષ્ટ હોય તો અંદાજથી પ્રશ્ન બનાવવો નહીં.
-માત્ર લખવું:
-"પ્રશ્નનો આ ભાગ ફોટામાં સ્પષ્ટ દેખાતો નથી."
+11) વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો જવાબ આપવો.
 
-12) વિદ્યાર્થીને સીધો answer sheetમાં લખી શકાય એવો અંતિમ જવાબ આપવો.
+12) "આ જ પ્રશ્ન boardમાં આવશે" એવું ન કહેવું.
 
-13) "આ પ્રશ્ન ચોક્કસ boardમાં આવશે" એવું ક્યારેય ન કહેવું.
+13) official GSEB Question Bankનો પુરાવો ન હોય તો
+Question Bankમાં ચોક્કસ છે એવું ન કહેવું.
 
-14) official GSEB Question Bankમાં હોવાનો પુરાવો ન હોય તો
-"આ Question Bankમાં છે" એવું claim ન કરવું.
-
-15) માહિતી ખાતરીથી ખબર ન હોય તો જવાબ બનાવવો નહીં.
+14) માહિતી ખાતરીથી ખબર ન હોય તો બનાવવી નહીં.
 
 
-==================================================
-ગણિત માટે ખાસ નિયમો
-==================================================
+==============================
+ગણિત
+==============================
 
-ગણિતનો પ્રશ્ન હોય તો:
+ગણિત હોય તો:
 
-Given / આપેલ
-Find / શોધવાનું
-Formula / સૂત્ર
-Substitution / મૂલ્યો મૂકવા
-Calculation / ગણતરી
-Final Answer / અંતિમ જવાબ
+આપેલ
+શોધવાનું
+સૂત્ર
+મૂલ્યો મૂકવા
+ગણતરી
+અંતિમ જવાબ
 
-આ ક્રમમાં સમજાવવો.
+ક્રમમાં સમજાવો.
 
-દરેક calculation ફરી ચકાસવી.
+દરેક calculation ફરી ચકાસો.
 
-Final Answer સ્પષ્ટ રીતે આપવો.
-
-જરૂર હોય ત્યાં:
+જરૂર હોય ત્યાં LaTeX વાપરો:
 
 \\( ... \\)
 
-અથવા
+અથવા:
 
 \\[ ... \\]
 
-formula notation વાપરી શકાય.
-
-Frequency, class interval, fi, xi, ui, fixi વગેરે
-હોય તો સાચી Markdown table બનાવવી.
+Frequency, class interval, fi, xi, ui, fixi વગેરે હોય
+તો સાચી table બનાવો.
 
 
-==================================================
-વિજ્ઞાન માટે
-==================================================
+==============================
+વિજ્ઞાન
+==============================
 
-વ્યાખ્યા,
-કારણ,
-મુખ્ય મુદ્દા,
-તફાવત,
-પ્રક્રિયા,
-સૂત્ર,
-ઉદાહરણ
-
-વગેરે exam-friendly રીતે આપો.
+વ્યાખ્યા, કારણ, પ્રક્રિયા, મુદ્દા, તફાવત અને
+સૂત્રો exam-friendly રીતે આપો.
 
 
-==================================================
-સામાજિક વિજ્ઞાન માટે
-==================================================
+==============================
+સામાજિક વિજ્ઞાન
+==============================
 
 જવાબ મુદ્દાવાર આપો.
 
 જ્યાં જરૂરી હોય ત્યાં:
-
-• કારણ
-• પરિણામ
-• લક્ષણો
-• મહત્વ
-• તફાવત
-
-આ રીતે સમજાવો.
+કારણ
+પરિણામ
+લક્ષણો
+મહત્વ
+તફાવત
 
 
-==================================================
-જવાબનું FORMAT
-==================================================
-
+==============================
+FINAL FORMAT
+==============================
 
 ## 💥 પ્રશ્નને સરળ રીતે સમજીએ
 
 1. પ્રશ્ન શું પૂછે છે?
-2. જરૂરી માહિતી / concept
+2. જરૂરી માહિતી
 3. પગલુંવાર સમજણ
-4. અંતિમ પરિણામ / મુખ્ય મુદ્દો
+4. અંતિમ પરિણામ
 
 
 ## 📝 પરીક્ષામાં લખવાનો જવાબ
 
-વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો
-સંપૂર્ણ અને યોગ્ય જવાબ.
+Answer sheetમાં સીધો લખી શકાય એવો જવાબ.
 
 
 ## ⭐ મહત્વ
 
-માત્ર યોગ્ય હોય ત્યારે નીચેમાંથી એક લખવું:
+Normal / Practice-important / Question-bank-related
 
-Normal
-
-Practice-important
-
-Question-bank-related
-
-અને એક ટૂંકું કારણ આપવું.
-
-જો મહત્વ નક્કી કરી શકાય નહીં તો
-કોઈ ખોટો claim ન કરવો.
+માત્ર યોગ્ય હોય ત્યારે લખવું.
 
 
 ## ⚠️ ધ્યાનમાં રાખવું
 
-માત્ર 1 થી 3 મહત્વની ભૂલો અથવા tips.
+માત્ર 1 થી 3 મહત્વની tips.
 
 
-==================================================
-અંતિમ યાદ
-==================================================
-
-વિદ્યાર્થીને માત્ર તૈયાર જવાબ આપવો.
-
-કોઈ internal reasoning નહીં.
+==============================
+FINAL REMINDER
+==============================
 
 કોઈ <think> નહીં.
+
+કોઈ internal reasoning નહીં.
 
 કોઈ AI planning નહીં.
 
@@ -487,11 +490,7 @@ Question-bank-related
 
 સરળ ગુજરાતી.
 
-ધોરણ 10 GSEB exam-friendly જવાબ.
-
-પ્રશ્ન ફોટામાં હોય તો પહેલા ફોટો વાંચવો,
-પછી જવાબ આપવો.
-
+GSEB ધોરણ 10 exam-friendly જવાબ.
 `;
 
       // ==================================================
@@ -508,7 +507,7 @@ Question-bank-related
       ];
 
       // ==================================================
-      // IMAGE TO GROQ
+      // IMAGE
       // ==================================================
 
       if (file) {
@@ -536,7 +535,7 @@ Question-bank-related
       }
 
       // ==================================================
-      // GROQ API REQUEST
+      // GROQ REQUEST
       // ==================================================
 
       const response =
@@ -584,8 +583,6 @@ Question-bank-related
                 max_completion_tokens:
                   8192,
 
-                // Keep model reasoning for difficult
-                // math questions but DO NOT show it.
                 reasoning_effort:
                   "default",
 
@@ -602,14 +599,14 @@ Question-bank-related
         );
 
       // ==================================================
-      // GROQ RESPONSE
+      // RESPONSE
       // ==================================================
 
       const data =
         await response.json();
 
       // ==================================================
-      // GROQ ERROR
+      // API ERROR
       // ==================================================
 
       if (!response.ok) {
@@ -637,19 +634,14 @@ Question-bank-related
       }
 
       // ==================================================
-      // EXTRACT ANSWER
+      // ANSWER
       // ==================================================
 
       let answer =
-
         data
           ?.choices?.[0]
           ?.message
           ?.content || "";
-
-      // ==================================================
-      // CLEAN ANSWER
-      // ==================================================
 
       answer =
         cleanAnswer(answer);
@@ -662,8 +654,7 @@ Question-bank-related
       }
 
       // ==================================================
-      // COUNT USAGE
-      // FULL ACCESS USER IS NOT COUNTED
+      // USAGE COUNT
       // ==================================================
 
       let usedToday;
@@ -683,11 +674,8 @@ Question-bank-related
       else {
 
         dailyUsage.set(
-
           usage.key,
-
           usage.used + 1
-
         );
 
         usedToday =
@@ -695,11 +683,8 @@ Question-bank-related
 
         remainingToday =
           Math.max(
-
             0,
-
             FREE_LIMIT - usedToday
-
           );
 
       }
@@ -721,7 +706,6 @@ Question-bank-related
             !!hasFullAccess,
 
           dailyLimit:
-
             hasFullAccess
               ? "Unlimited"
               : FREE_LIMIT,
@@ -735,10 +719,6 @@ Question-bank-related
       });
 
     }
-
-    // ==================================================
-    // SERVER ERROR
-    // ==================================================
 
     catch (error) {
 
@@ -764,19 +744,13 @@ Question-bank-related
 // ==================================================
 
 app.listen(
-
   PORT,
-
   "0.0.0.0",
-
   () => {
 
     console.log(
-
       `GSEB Study Helper running on port ${PORT}`
-
     );
 
   }
-
 );
