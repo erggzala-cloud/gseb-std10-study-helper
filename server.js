@@ -30,13 +30,18 @@ const upload = multer({
 });
 
 // --------------------------------------------------
-// FREE DAILY LIMIT
-// 20 QUESTIONS PER IP PER DAY
+// DAILY LIMIT
+// NORMAL STUDENTS = 20 QUESTIONS
+// FULL ACCESS = NO APP LIMIT
 // --------------------------------------------------
 
 const dailyUsage = new Map();
 
 const FREE_LIMIT = 20;
+
+// Full Access Code Render Environment Variableમાંથી આવશે
+const FULL_ACCESS_CODE =
+  process.env.FULL_ACCESS_CODE || "";
 
 function getClientIp(req) {
 
@@ -151,6 +156,21 @@ app.post(
       const marks =
         (req.body.marks || "board").trim();
 
+      // --------------------------------------------
+      // FULL ACCESS CODE
+      // --------------------------------------------
+
+      const accessCode =
+        (
+          req.body.accessCode ||
+          req.body.access ||
+          ""
+        ).trim();
+
+      const hasFullAccess =
+        FULL_ACCESS_CODE &&
+        accessCode === FULL_ACCESS_CODE;
+
       const file = req.file;
 
       if (!question && !file) {
@@ -188,28 +208,35 @@ app.post(
 
       // --------------------------------------------
       // FREE LIMIT
+      // ONLY NORMAL STUDENTS
       // --------------------------------------------
 
       const usage = getUsage(req);
 
-      if (usage.used >= FREE_LIMIT) {
+      if (!hasFullAccess) {
 
-        return res.status(429).json({
+        if (usage.used >= FREE_LIMIT) {
 
-          error:
-            "આજે તમારી free limit પૂરી થઈ ગઈ છે. કાલે ફરી પ્રયાસ કરો.",
+          return res.status(429).json({
 
-          usage: {
+            error:
+              "આજે તમારી free limit પૂરી થઈ ગઈ છે. કાલે ફરી પ્રયાસ કરો.",
 
-            dailyLimit: FREE_LIMIT,
+            usage: {
 
-            usedToday: usage.used,
+              fullAccess: false,
 
-            remainingToday: 0
+              dailyLimit: FREE_LIMIT,
 
-          }
+              usedToday: usage.used,
 
-        });
+              remainingToday: 0
+
+            }
+
+          });
+
+        }
 
       }
 
@@ -324,11 +351,9 @@ Normal / Practice-important / Question-bank-related
       // --------------------------------------------
 
       const parts = [
-
         {
           text: prompt
         }
-
       ];
 
       // --------------------------------------------
@@ -441,22 +466,36 @@ Normal / Practice-important / Question-bank-related
         "જવાબ મળ્યો નથી.";
 
       // --------------------------------------------
-      // COUNT SUCCESSFUL QUESTION
+      // COUNT ONLY NORMAL STUDENTS
+      // FULL ACCESS USER IS NOT COUNTED
       // --------------------------------------------
 
-      dailyUsage.set(
-        usage.key,
-        usage.used + 1
-      );
+      let usedToday;
+      let remainingToday;
 
-      const usedToday =
-        usage.used + 1;
+      if (hasFullAccess) {
 
-      const remainingToday =
-        Math.max(
-          0,
-          FREE_LIMIT - usedToday
+        usedToday = 0;
+
+        remainingToday = "Unlimited";
+
+      } else {
+
+        dailyUsage.set(
+          usage.key,
+          usage.used + 1
         );
+
+        usedToday =
+          usage.used + 1;
+
+        remainingToday =
+          Math.max(
+            0,
+            FREE_LIMIT - usedToday
+          );
+
+      }
 
       // --------------------------------------------
       // RESPONSE
@@ -470,8 +509,12 @@ Normal / Practice-important / Question-bank-related
 
         usage: {
 
+          fullAccess: !!hasFullAccess,
+
           dailyLimit:
-            FREE_LIMIT,
+            hasFullAccess
+              ? "Unlimited"
+              : FREE_LIMIT,
 
           usedToday,
 
