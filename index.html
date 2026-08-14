@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <title>GSEB ધોરણ 10 • Study Helper</title>
 
 <script>
@@ -11,54 +12,70 @@ window.MathJax = {
     inlineMath: [['\\(','\\)'], ['$', '$']],
     displayMath: [['\\[','\\]'], ['$$','$$']]
   },
-  svg: { fontCache: 'global' }
+  svg: {
+    fontCache: 'global'
+  }
 };
 </script>
 
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
 <style>
+
 :root{
   --bg:#f4f7fb;
-  --card:#fff;
+  --card:#ffffff;
   --ink:#182230;
   --muted:#657286;
   --brand:#087ea4;
+  --brand2:#086b8b;
   --line:#dce4ed;
   --soft:#eaf6fb;
-  --ok:#eaf8ef
+  --ok:#eaf8ef;
+  --danger:#fff0f0;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
   background:var(--bg);
   color:var(--ink);
-  font-family:system-ui,-apple-system,"Noto Sans Gujarati","Noto Sans",sans-serif
+  font-family:
+    system-ui,
+    -apple-system,
+    "Noto Sans Gujarati",
+    "Noto Sans",
+    sans-serif;
 }
 
 header{
-  background:linear-gradient(135deg,#086b8b,#0a8bb1);
-  color:#fff;
+  background:linear-gradient(135deg,var(--brand2),#0a8bb1);
+  color:white;
   padding:20px 16px 22px;
   position:sticky;
   top:0;
-  z-index:5
+  z-index:5;
+  box-shadow:0 3px 12px rgba(0,0,0,.12);
 }
 
-h1{font-size:25px;margin:0 0 4px}
+h1{
+  font-size:25px;
+  margin:0 0 4px;
+}
 
 header p{
   margin:0;
   opacity:.9;
-  font-size:14px
+  font-size:14px;
 }
 
 main{
   max-width:820px;
   margin:auto;
-  padding:14px
+  padding:14px;
 }
 
 .card{
@@ -67,35 +84,43 @@ main{
   border-radius:18px;
   padding:15px;
   margin-bottom:13px;
-  box-shadow:0 4px 18px rgba(20,40,60,.05)
+  box-shadow:0 4px 18px rgba(20,40,60,.05);
 }
 
 label{
   display:block;
   font-weight:700;
   font-size:14px;
-  margin:0 0 7px
+  margin:0 0 7px;
 }
 
-input,select,textarea{
+input,
+select,
+textarea{
   width:100%;
   border:1px solid #cbd6e2;
   border-radius:12px;
   padding:12px;
   font:inherit;
   background:#fff;
-  color:var(--ink)
+  color:var(--ink);
 }
 
 textarea{
   min-height:125px;
-  resize:vertical
+  resize:vertical;
 }
 
 .row{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px
+  gap:10px;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
 }
 
 .btn{
@@ -103,23 +128,22 @@ textarea{
   border-radius:13px;
   padding:13px 15px;
   font:700 16px inherit;
-  cursor:pointer
+  cursor:pointer;
+}
+
+.btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
 }
 
 .primary{
   background:var(--brand);
-  color:#fff
+  color:white;
 }
 
 .secondary{
   background:#e8f2f7;
-  color:#174b60
-}
-
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px
+  color:#174b60;
 }
 
 .drop{
@@ -127,22 +151,22 @@ textarea{
   border-radius:15px;
   padding:16px;
   text-align:center;
-  background:#fbfdff
+  background:#fbfdff;
 }
 
 .drop input{
   border:0;
   padding:0;
-  background:transparent
+  background:transparent;
 }
 
 .preview{
   display:none;
-  margin-top:10px;
+  margin:12px auto 0;
   max-height:280px;
   max-width:100%;
   border-radius:12px;
-  border:1px solid var(--line)
+  border:1px solid var(--line);
 }
 
 .status{
@@ -151,35 +175,35 @@ textarea{
   background:var(--soft);
   color:#13546c;
   font-size:14px;
-  display:none
+  display:none;
 }
 
 .answer{
-  line-height:1.7
+  line-height:1.7;
 }
 
 .answer h2{
   font-size:20px;
-  margin:20px 0 8px
+  margin:20px 0 8px;
 }
 
 .answer h3{
   font-size:17px;
-  margin:16px 0 6px
+  margin:16px 0 6px;
 }
 
 .answer ul{
-  padding-left:24px
+  padding-left:24px;
 }
 
 .answer mjx-container{
-  font-size:1.05em
+  font-size:1.05em;
 }
 
 .answer mjx-container[display="true"]{
   margin:12px 0!important;
   overflow-x:auto;
-  overflow-y:hidden
+  overflow-y:hidden;
 }
 
 .step{
@@ -187,121 +211,175 @@ textarea{
   background:#f6fbfd;
   padding:11px 12px;
   border-radius:0 12px 12px 0;
-  margin:8px 0
+  margin:8px 0;
 }
 
-.answer .study-table{
+.study-table-wrap{
+  width:100%;
+  overflow-x:auto;
+  margin:14px 0;
+}
+
+.study-table{
   width:100%;
   border-collapse:collapse;
-  margin:14px 0;
   font-size:14px;
-  background:#fff;
-  overflow:hidden
+  background:white;
 }
 
-.answer .study-table th,
-.answer .study-table td{
+.study-table th,
+.study-table td{
   border:1px solid #cbd6e2;
   padding:9px 8px;
   text-align:center;
-  vertical-align:middle
+  vertical-align:middle;
 }
 
-.answer .study-table th{
+.study-table th{
   background:#eaf6fb;
-  font-weight:800
-}
-
-.answer .study-table-wrap{
-  width:100%;
-  overflow-x:auto
+  font-weight:800;
 }
 
 .small{
   font-size:12px;
   color:var(--muted);
-  line-height:1.5
+  line-height:1.5;
 }
 
-.keyline{
-  display:flex;
-  gap:8px;
-  align-items:center
+.usage{
+  display:none;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:var(--ok);
+  color:#21643a;
+  font-size:13px;
+  font-weight:600;
 }
 
-.keyline input{
-  flex:1
+.error{
+  background:var(--danger);
+  color:#a32323;
 }
 
 footer{
   text-align:center;
   color:var(--muted);
   font-size:12px;
-  padding:12px
+  padding:12px;
 }
 
 @media(max-width:600px){
-  .row,.actions{
-    grid-template-columns:1fr
+
+  .row,
+  .actions{
+    grid-template-columns:1fr;
   }
 
   main{
-    padding:10px
+    padding:10px;
   }
 
   .card{
-    padding:13px
+    padding:13px;
+  }
+
+  h1{
+    font-size:22px;
   }
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
+
 <h1>📚 GSEB ધોરણ 10 Study Helper</h1>
-<p>Board-style Answer • Gujarati • Maths Steps • Exploding View</p>
+
+<p>
+Board-style Answer • Gujarati • Maths Steps • Exploding View
+</p>
+
 </header>
 
 <main>
 
+<!-- SUBJECT -->
+
 <div class="card">
+
 <div class="row">
 
 <div>
+
 <label>📘 વિષય</label>
+
 <select id="subject">
-<option>ગણિત</option>
-<option>વિજ્ઞાન</option>
-<option>સામાજિક વિજ્ઞાન</option>
-<option>ગુજરાતી</option>
-<option>અંગ્રેજી</option>
-<option>સંસ્કૃત</option>
-<option>અન્ય</option>
+
+<option value="ગણિત">ગણિત</option>
+
+<option value="વિજ્ઞાન">વિજ્ઞાન</option>
+
+<option value="સામાજિક વિજ્ઞાન">
+સામાજિક વિજ્ઞાન
+</option>
+
+<option value="ગુજરાતી">ગુજરાતી</option>
+
+<option value="અંગ્રેજી">અંગ્રેજી</option>
+
+<option value="સંસ્કૃત">સંસ્કૃત</option>
+
+<option value="અન્ય">અન્ય</option>
+
 </select>
+
 </div>
+
 
 <div>
+
 <label>🎯 જવાબનું સ્તર</label>
+
 <select id="marks">
+
 <option value="1">1 માર્ક</option>
+
 <option value="2">2 માર્ક</option>
+
 <option value="3">3 માર્ક</option>
+
 <option value="4">4 માર્ક</option>
-<option value="board">Board-style Practice</option>
-<option value="detail">વિગતવાર સમજણ</option>
+
+<option value="board">
+Board-style Practice
+</option>
+
+<option value="detail">
+વિગતવાર સમજણ
+</option>
+
 </select>
+
 </div>
 
 </div>
+
 </div>
+
+
+<!-- QUESTION -->
 
 <div class="card">
 
 <label>✍️ પ્રશ્ન લખો</label>
 
-<textarea id="question"
-placeholder="ઉદાહરણ: પ્રકાશસંશ્લેષણ એટલે શું? અથવા ગણિતનો દાખલો લખો..."></textarea>
+<textarea
+id="question"
+placeholder="ઉદાહરણ: પ્રકાશસંશ્લેષણ એટલે શું? અથવા ગણિતનો દાખલો લખો..."
+></textarea>
 
 <div style="height:10px"></div>
 
@@ -311,445 +389,591 @@ placeholder="ઉદાહરણ: પ્રકાશસંશ્લેષણ એ�
 
 <div class="actions" style="margin-bottom:10px">
 
-<button type="button"
+<button
+type="button"
 class="btn secondary"
-id="galleryBtn">
+id="galleryBtn"
+>
 🖼️ Galleryમાંથી ફોટો લો
 </button>
 
-<button type="button"
+<button
+type="button"
 class="btn secondary"
-id="cameraBtn">
+id="cameraBtn"
+>
 📷 Cameraથી ફોટો લો
 </button>
 
 </div>
 
-<input id="photo"
+<input
+id="photo"
 type="file"
 accept="image/*"
-style="display:none">
+style="display:none"
+>
 
-<input id="cameraPhoto"
+<input
+id="cameraPhoto"
 type="file"
 accept="image/*"
 capture="environment"
-style="display:none">
+style="display:none"
+>
 
 <div class="small">
-Galleryમાં પહેલેથી રહેલો screenshot/photo પણ પસંદ કરી શકશો.
+
+Galleryમાં પહેલેથી રહેલો screenshot/photo પસંદ કરી શકશો.
+
 Cameraથી નવો ફોટો પણ લઈ શકશો.
+
 </div>
 
-<img id="preview"
+<img
+id="preview"
 class="preview"
-alt="Question preview">
-
-</div>
-</div>
-
-<div class="card">
-
-<label>🔑 Gemini API Key</label>
-
-<div class="keyline">
-
-<input
-id="apikey"
-type="password"
-placeholder="Google AI Studio API key અહીં નાખો">
-
-<button class="btn secondary" id="showkey">
-👁️
-</button>
+alt="Question preview"
+>
 
 </div>
 
-<p class="small">
-API key codeમાં save કરેલી નથી.
-આ browserમાં local storageમાં રહે છે.
-Public GitHub codeમાં key ક્યારેય paste ન કરવી.
-</p>
-
 </div>
+
+
+<!-- BUTTONS -->
 
 <div class="card">
 
 <div class="actions">
 
-<button class="btn primary" id="answerBtn">
+<button
+class="btn primary"
+id="answerBtn"
+>
 🚀 જવાબ બનાવો
 </button>
 
-<button class="btn secondary" id="clearBtn">
+<button
+class="btn secondary"
+id="clearBtn"
+>
 🧹 Clear
 </button>
 
 </div>
 
-<div id="status"
+<div
+id="status"
 class="status"
-style="margin-top:10px">
+style="margin-top:10px"
+>
+</div>
+
+<div
+id="usage"
+class="usage"
+>
 </div>
 
 </div>
 
-<div id="result"
+
+<!-- RESULT -->
+
+<div
+id="result"
 class="card answer"
-style="display:none">
+style="display:none"
+>
 </div>
+
 
 <footer>
+
 GSEB official Question Bank / syllabus સાથે final cross-check કરવો.
+
+<br>
+
 Exact board-paper predictionની guarantee નથી.
+
 </footer>
 
 </main>
 
+
 <script>
 
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-const photo=$('photo'),
-cameraPhoto=$('cameraPhoto'),
-preview=$('preview'),
-key=$('apikey'),
-status=$('status'),
-result=$('result');
+const photo = $("photo");
 
-$('galleryBtn').addEventListener('click',()=>photo.click());
+const cameraPhoto = $("cameraPhoto");
 
-$('cameraBtn').addEventListener('click',()=>cameraPhoto.click());
+const preview = $("preview");
+
+const status = $("status");
+
+const usage = $("usage");
+
+const result = $("result");
+
+const answerBtn = $("answerBtn");
+
+
+// ------------------------------------------
+// PHOTO BUTTONS
+// ------------------------------------------
+
+$("galleryBtn").addEventListener(
+  "click",
+  () => photo.click()
+);
+
+$("cameraBtn").addEventListener(
+  "click",
+  () => cameraPhoto.click()
+);
+
+
+// ------------------------------------------
+// SELECT IMAGE
+// ------------------------------------------
 
 function useSelectedFile(input){
 
-  const f=input.files?.[0];
+  const file = input.files?.[0];
 
-  if(!f)return;
+  if(!file){
+    return;
+  }
 
-  const dt=new DataTransfer();
+  const dataTransfer = new DataTransfer();
 
-  dt.items.add(f);
+  dataTransfer.items.add(file);
 
-  photo.files=dt.files;
+  photo.files = dataTransfer.files;
 
-  preview.src=URL.createObjectURL(f);
+  preview.src = URL.createObjectURL(file);
 
-  preview.style.display='block';
+  preview.style.display = "block";
 }
 
-photo.addEventListener('change',()=>useSelectedFile(photo));
 
-cameraPhoto.addEventListener('change',()=>useSelectedFile(cameraPhoto));
+// Gallery
 
-$('showkey').onclick=()=>{
-  key.type=key.type==='password'?'text':'password'
-};
+photo.addEventListener(
+  "change",
+  () => useSelectedFile(photo)
+);
 
-$('clearBtn').onclick=()=>{
-  $('question').value='';
-  photo.value='';
-  preview.style.display='none';
-  result.style.display='none';
-  status.style.display='none'
-};
 
-function setStatus(t){
-  status.textContent=t;
-  status.style.display='block'
+// Camera
+
+cameraPhoto.addEventListener(
+  "change",
+  () => useSelectedFile(cameraPhoto)
+);
+
+
+// ------------------------------------------
+// STATUS
+// ------------------------------------------
+
+function setStatus(message, isError=false){
+
+  status.textContent = message;
+
+  status.classList.toggle(
+    "error",
+    isError
+  );
+
+  status.style.display = "block";
 }
 
-function fileToBase64(file){
-  return new Promise((resolve,reject)=>{
-    const r=new FileReader();
 
-    r.onload=()=>{
-      resolve(r.result.split(',')[1])
-    };
+// ------------------------------------------
+// MARKDOWN RENDERER
+// ------------------------------------------
 
-    r.onerror=reject;
+function escapeHtml(text){
 
-    r.readAsDataURL(file)
-  })
-}
-
-function escapeHtml(s){
-  return s.replace(
+  return text.replace(
     /[&<>"']/g,
-    m=>({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#039;'
-    }[m])
-  )
+    char => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[char])
+  );
+
 }
+
 
 function renderMarkdown(md){
 
   let text = escapeHtml(md);
 
-  const lines = text.split('\n');
+  const lines = text.split("\n");
 
-  let out = [];
+  let output = [];
 
   let i = 0;
+
 
   const isTableLine = line => {
 
     const t = line.trim();
 
-    return t.startsWith('|') &&
-           t.endsWith('|') &&
-           t.split('|').length >= 3;
+    return (
+      t.startsWith("|") &&
+      t.endsWith("|") &&
+      t.split("|").length >= 3
+    );
 
   };
+
 
   const isSeparator = line => {
 
-    if(!isTableLine(line)) return false;
+    if(!isTableLine(line)){
+      return false;
+    }
 
-    return line.trim()
+    return line
+      .trim()
       .slice(1,-1)
-      .split('|')
-      .every(c => /^:?-{3,}:?$/.test(c.trim()));
+      .split("|")
+      .every(
+        cell => /^:?-{3,}:?$/.test(cell.trim())
+      );
 
   };
+
 
   while(i < lines.length){
 
     if(
       isTableLine(lines[i]) &&
-      i+1 < lines.length &&
+      i + 1 < lines.length &&
       isSeparator(lines[i+1])
     ){
 
-      const cells = line =>
-        line.trim()
+      const getCells = line =>
+        line
+          .trim()
           .slice(1,-1)
-          .split('|')
-          .map(x=>x.trim());
+          .split("|")
+          .map(cell => cell.trim());
 
-      const head = cells(lines[i]);
+
+      const header = getCells(lines[i]);
 
       i += 2;
 
-      let rows = [];
+      const rows = [];
 
-      while(i < lines.length && isTableLine(lines[i])){
 
-        rows.push(cells(lines[i]));
+      while(
+        i < lines.length &&
+        isTableLine(lines[i])
+      ){
+
+        rows.push(
+          getCells(lines[i])
+        );
 
         i++;
 
       }
 
-      let html =
-        '<div class="study-table-wrap"><table class="study-table"><thead><tr>';
 
-      head.forEach(c =>
-        html += '<th>' + c + '</th>'
-      );
+      let table =
+        '<div class="study-table-wrap">' +
+        '<table class="study-table">' +
+        '<thead><tr>';
 
-      html += '</tr></thead><tbody>';
 
-      rows.forEach(row => {
+      header.forEach(cell => {
 
-        html += '<tr>';
-
-        for(let j=0;j<head.length;j++)
-          html += '<td>' + (row[j] ?? '') + '</td>';
-
-        html += '</tr>';
+        table +=
+          "<th>" +
+          cell +
+          "</th>";
 
       });
 
-      html += '</tbody></table></div>';
 
-      out.push(html);
+      table +=
+        "</tr></thead><tbody>";
+
+
+      rows.forEach(row => {
+
+        table += "<tr>";
+
+
+        for(
+          let j = 0;
+          j < header.length;
+          j++
+        ){
+
+          table +=
+            "<td>" +
+            (row[j] || "") +
+            "</td>";
+
+        }
+
+
+        table += "</tr>";
+
+      });
+
+
+      table +=
+        "</tbody></table></div>";
+
+
+      output.push(table);
 
       continue;
+
     }
 
-    out.push(lines[i]);
+
+    output.push(lines[i]);
 
     i++;
+
   }
 
-  text = out.join('\n');
 
-  text=text
-    .replace(/^### (.*)$/gm,'<h3>$1</h3>')
-    .replace(/^## (.*)$/gm,'<h2>$1</h2>')
-    .replace(/^# (.*)$/gm,'<h2>$1</h2>');
+  text = output.join("\n");
 
-  text=text.replace(
+
+  // Headings
+
+  text = text.replace(
+    /^### (.*)$/gm,
+    "<h3>$1</h3>"
+  );
+
+  text = text.replace(
+    /^## (.*)$/gm,
+    "<h2>$1</h2>"
+  );
+
+  text = text.replace(
+    /^# (.*)$/gm,
+    "<h2>$1</h2>"
+  );
+
+
+  // Bold
+
+  text = text.replace(
     /\*\*(.*?)\*\*/g,
-    '<strong>$1</strong>'
+    "<strong>$1</strong>"
   );
 
-  text=text.replace(
+
+  // Bullet points
+
+  text = text.replace(
     /^\s*[-•] (.*)$/gm,
-    '<li>$1</li>'
+    "<li>$1</li>"
   );
 
-  text=text.replace(
+
+  text = text.replace(
     /(<li>.*<\/li>\n?)+/g,
-    m=>'<ul>'+m+'</ul>'
+    match => "<ul>" + match + "</ul>"
   );
 
-  text=text.replace(
+
+  // Numbered steps
+
+  text = text.replace(
     /^\s*(\d+)\.\s+(.*)$/gm,
     '<div class="step"><strong>Step $1:</strong> $2</div>'
   );
 
+
   return text
-    .replace(/\n{2,}/g,'<br><br>')
-    .replace(/\n/g,'<br>');
+    .replace(/\n{2,}/g, "<br><br>")
+    .replace(/\n/g, "<br>");
+
 }
 
-async function generate(){
 
-  const q=$('question').value.trim(),
-        f=photo.files?.[0],
-        api=key.value.trim();
+// ------------------------------------------
+// GENERATE ANSWER
+// ------------------------------------------
 
-  if(!q&&!f){
-    alert('પહેલા પ્રશ્ન લખો અથવા ફોટો પસંદ કરો.');
-    return
+async function generateAnswer(){
+
+  const question =
+    $("question").value.trim();
+
+  const file =
+    photo.files?.[0];
+
+  const subject =
+    $("subject").value;
+
+  const marks =
+    $("marks").value;
+
+
+  if(!question && !file){
+
+    alert(
+      "પહેલા પ્રશ્ન લખો અથવા ફોટો પસંદ કરો."
+    );
+
+    return;
+
   }
 
-  if(!api){
-    alert('Gemini API Key નાખો.');
-    return
-  }
 
-  const subject=$('subject').value,
-        marks=$('marks').value;
+  // ----------------------------------------
+  // UI LOCK
+  // ----------------------------------------
+
+  answerBtn.disabled = true;
+
+  answerBtn.textContent =
+    "⏳ જવાબ બની રહ્યો છે...";
+
+
+  result.style.display = "none";
+
+  usage.style.display = "none";
+
 
   setStatus(
-    '⏳ પ્રશ્ન વાંચી રહ્યો છું અને GSEB-style જવાબ બનાવી રહ્યો છું...'
+    "⏳ પ્રશ્ન વાંચી રહ્યો છું અને GSEB-style જવાબ બનાવી રહ્યો છું..."
   );
 
-  result.style.display='none';
 
   try{
 
-    const parts=[];
+    // --------------------------------------
+    // FORM DATA
+    // --------------------------------------
 
-    const prompt=`તમે Gujarat Secondary and Higher Secondary Education Board (GSEB) ધોરણ 10ના અનુભવી શિક્ષક છો.
+    const formData = new FormData();
 
-વિષય: ${subject}
 
-જવાબનું સ્તર: ${marks}
+    formData.append(
+      "question",
+      question
+    );
 
-મુખ્ય નિયમો:
 
-1) ફોટામાં પ્રશ્ન હોય તો તેને ધ્યાનથી વાંચો. અસ્પષ્ટ હોય તો ambiguity સ્પષ્ટ કહો.
+    formData.append(
+      "subject",
+      subject
+    );
 
-2) જવાબ સરળ, સ્વાભાવિક ગુજરાતી ભાષામાં આપો. જરૂરી technical શબ્દ કૌંસમાં Englishમાં આપી શકો.
 
-3) GSEB ધોરણ 10ના board-styleમાં પરીક્ષામાં લખી શકાય એવો સીધો જવાબ આપો.
+    formData.append(
+      "marks",
+      marks
+    );
 
-4) 1/2/3/4 માર્ક મુજબ મુદ્દા અને લંબાઈ રાખો.
 
-5) ગણિત હોય તો આપેલ (Given), શું શોધવાનું છે, સૂત્ર (Formula), substitution, દરેક calculation step અને અંતિમ જવાબ/unit આપો; કોઈ જરૂરી step છોડશો નહીં. ગણિતના સૂત્રો અને calculations માટે LaTeX વાપરો: inline માટે \\( ... \\) અને અલગ formula માટે \\[ ... \\]. LaTeX બહાર $ ચિહ્નનો ઉપયોગ ન કરો. દરેક stepમાં સાચી ગણતરી ફરી ચકાસો અને final answerને boxed formમાં આપો. જો frequency/class interval/fi/xi/ui/fixi જેવી માહિતી હોય તો તેને સાચી Markdown tableમાં ગોઠવો: પહેલી line header, બીજી line |---|---|---| જેવી separator અને પછી દરેક row. ફક્ત | થી લખેલી કાચી rows ન આપશો.
+    if(file){
 
-6) વિજ્ઞાન/સામાજિક વિજ્ઞાનમાં જરૂરી વ્યાખ્યા, કારણ, મુદ્દા, તફાવત વગેરે exam-friendly રીતે આપો.
-
-7) official GSEB Question Bankમાં હોવાનો પુરાવો ન હોય તો “Question Bankમાં ચોક્કસ છે” એવું claim ન કરો.
-
-8) “આ જ પ્રશ્ન boardમાં આવશે” એવું prediction ન આપો.
-
-9) માહિતી ખાતરીથી ખબર ન હોય તો બનાવશો નહીં.
-
-આ formatમાં જવાબ આપો:
-
-## 💥 Exploding View
-
-1. પ્રશ્ન શું પૂછે છે?
-2. જરૂરી concept/માહિતી
-3. Step-by-step સમજણ
-4. Final result / મુખ્ય મુદ્દો
-
-## 📝 પરીક્ષામાં લખવાનો જવાબ
-
-વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો જવાબ.
-
-## ⭐ મહત્વ
-
-Normal / Practice-important / Question-bank-related — માત્ર યોગ્ય હોય તે. એક ટૂંકું કારણ.
-
-## ⚠️ ધ્યાનમાં રાખવું
-
-માત્ર 1-3 મહત્વની ભૂલો/ટિપ્સ.
-
-વિદ્યાર્થીનો પ્રશ્ન: ${q||'(ફોટામાંથી વાંચો)'}`;
-
-    parts.push({text:prompt});
-
-    if(f){
-
-      if(!f.type.startsWith('image/'))
-        throw new Error('માત્ર image file પસંદ કરો.');
-
-      parts.push({
-        inline_data:{
-          mime_type:f.type,
-          data:await fileToBase64(f)
-        }
-      });
+      formData.append(
+        "image",
+        file
+      );
 
     }
 
-    const body={
-      contents:[
-        {
-          role:'user',
-          parts
-        }
-      ],
-      generationConfig:{
-        response_mime_type:'text/plain'
-      }
-    };
 
-    const res=await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent',
+    // --------------------------------------
+    // RENDER SERVER
+    // --------------------------------------
+
+    const response = await fetch(
+      "/api/solve",
       {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-goog-api-key':api
-        },
-        body:JSON.stringify(body)
+        method:"POST",
+        body:formData
       }
     );
 
-    const data=await res.json();
 
-    if(!res.ok)
+    const data =
+      await response.json();
+
+
+    // --------------------------------------
+    // ERROR
+    // --------------------------------------
+
+    if(!response.ok){
+
       throw new Error(
-        data?.error?.message||'Gemini API error'
+        data?.error ||
+        "Server error આવ્યો."
       );
 
-    const text=
-      data?.candidates?.[0]?.content?.parts
-        ?.map(p=>p.text||'')
-        .join('')||
-      'જવાબ મળ્યો નથી.';
+    }
 
-    result.innerHTML=renderMarkdown(text);
 
-    result.style.display='block';
+    // --------------------------------------
+    // ANSWER
+    // --------------------------------------
 
-    status.style.display='none';
+    const answer =
+      data?.answer ||
+      "જવાબ મળ્યો નથી.";
 
-    localStorage.setItem(
-      'gseb_api_key',
-      api
-    );
+
+    result.innerHTML =
+      renderMarkdown(answer);
+
+
+    result.style.display =
+      "block";
+
+
+    // --------------------------------------
+    // USAGE
+    // --------------------------------------
+
+    if(data?.usage){
+
+      usage.textContent =
+        "📊 આજે ઉપયોગ: " +
+        data.usage.usedToday +
+        " / " +
+        data.usage.dailyLimit +
+        " પ્રશ્નો • બાકી: " +
+        data.usage.remainingToday;
+
+
+      usage.style.display =
+        "block";
+
+    }
+
+
+    status.style.display =
+      "none";
+
+
+    // --------------------------------------
+    // MATHJAX
+    // --------------------------------------
 
     if(
       window.MathJax &&
@@ -757,30 +981,93 @@ Normal / Practice-important / Question-bank-related — માત્ર યો�
     ){
 
       try{
-        await MathJax.typesetPromise([result]);
-      }catch(err){
-        console.warn(
-          'MathJax render failed',
-          err
+
+        await MathJax.typesetPromise(
+          [result]
         );
+
+      }catch(error){
+
+        console.warn(
+          "MathJax error:",
+          error
+        );
+
       }
 
     }
 
-  }catch(e){
 
-    status.textContent=
-      '❌ '+e.message+
-      ' — API key, internet અને Google AI Studio access ચેક કરો.';
+    // Result ઉપર scroll
 
-    status.style.display='block'
+    result.scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    setStatus(
+      "❌ " +
+      error.message +
+      " — થોડા સમય પછી ફરી પ્રયાસ કરો.",
+      true
+    );
+
+  }finally{
+
+    answerBtn.disabled =
+      false;
+
+    answerBtn.textContent =
+      "🚀 જવાબ બનાવો";
+
   }
+
 }
 
-$('answerBtn').onclick=generate;
 
-key.value=
-  localStorage.getItem('gseb_api_key')||'';
+// ------------------------------------------
+// CLEAR
+// ------------------------------------------
+
+$("clearBtn").onclick = () => {
+
+  $("question").value = "";
+
+  photo.value = "";
+
+  cameraPhoto.value = "";
+
+  preview.src = "";
+
+  preview.style.display =
+    "none";
+
+  result.innerHTML = "";
+
+  result.style.display =
+    "none";
+
+  status.style.display =
+    "none";
+
+  usage.style.display =
+    "none";
+
+};
+
+
+// ------------------------------------------
+// ANSWER BUTTON
+// ------------------------------------------
+
+answerBtn.onclick =
+  generateAnswer;
 
 </script>
 
