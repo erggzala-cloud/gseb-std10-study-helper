@@ -17,9 +17,9 @@ app.use(
   })
 );
 
-// --------------------------------------------------
+// ==================================================
 // FILE UPLOAD
-// --------------------------------------------------
+// ==================================================
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -29,23 +29,23 @@ const upload = multer({
   }
 });
 
-// --------------------------------------------------
+// ==================================================
 // DAILY LIMIT
 // NORMAL STUDENTS = 20 QUESTIONS
-// FULL ACCESS = NO APP LIMIT
-// --------------------------------------------------
+// FULL ACCESS = UNLIMITED APP ACCESS
+// ==================================================
 
 const dailyUsage = new Map();
 
 const FREE_LIMIT = 20;
 
-// Full Access Code Render Environment Variableમાંથી આવશે
+// Render Environment Variable
 const FULL_ACCESS_CODE =
   process.env.FULL_ACCESS_CODE || "";
 
-// --------------------------------------------------
+// ==================================================
 // CLIENT IP
-// --------------------------------------------------
+// ==================================================
 
 function getClientIp(req) {
 
@@ -61,9 +61,9 @@ function getClientIp(req) {
 
 }
 
-// --------------------------------------------------
+// ==================================================
 // TODAY
-// --------------------------------------------------
+// ==================================================
 
 function getToday() {
 
@@ -79,9 +79,9 @@ function getToday() {
 
 }
 
-// --------------------------------------------------
+// ==================================================
 // USAGE
-// --------------------------------------------------
+// ==================================================
 
 function getUsage(req) {
 
@@ -100,9 +100,45 @@ function getUsage(req) {
 
 }
 
-// --------------------------------------------------
+// ==================================================
+// CLEAN AI OUTPUT
+// ==================================================
+
+function cleanAnswer(text) {
+
+  let answer = String(text || "");
+
+  // Remove <think>...</think>
+  answer = answer.replace(
+    /<think>[\s\S]*?<\/think>/gi,
+    ""
+  );
+
+  // Remove accidental unmatched <think>
+  answer = answer.replace(
+    /<think>[\s\S]*/gi,
+    ""
+  );
+
+  // Remove accidental closing tag
+  answer = answer.replace(
+    /<\/think>/gi,
+    ""
+  );
+
+  // Remove common internal AI headings if they appear
+  answer = answer.replace(
+    /^\s*(Final Answer|Final Plan|Analysis|Reasoning|Thoughts)\s*:?\s*/i,
+    ""
+  );
+
+  return answer.trim();
+
+}
+
+// ==================================================
 // WEBSITE
-// --------------------------------------------------
+// ==================================================
 
 app.get("/", (req, res) => {
 
@@ -112,23 +148,29 @@ app.get("/", (req, res) => {
 
 });
 
-// --------------------------------------------------
+// ==================================================
 // HEALTH CHECK
-// --------------------------------------------------
+// ==================================================
 
 app.get("/api/health", (req, res) => {
 
   res.json({
+
     success: true,
-    service: "GSEB Std 10 Study Helper",
-    status: "running"
+
+    service:
+      "GSEB Std 10 Study Helper",
+
+    status:
+      "running"
+
   });
 
 });
 
-// --------------------------------------------------
+// ==================================================
 // MAIN SOLVE API
-// --------------------------------------------------
+// ==================================================
 
 app.post(
   "/api/solve",
@@ -137,9 +179,9 @@ app.post(
 
     try {
 
-      // --------------------------------------------
+      // ==================================================
       // GROQ API KEY
-      // --------------------------------------------
+      // ==================================================
 
       const apiKey =
         process.env.GROQ_API_KEY;
@@ -155,9 +197,9 @@ app.post(
 
       }
 
-      // --------------------------------------------
+      // ==================================================
       // QUESTION
-      // --------------------------------------------
+      // ==================================================
 
       const question =
         (req.body.question || "").trim();
@@ -168,9 +210,9 @@ app.post(
       const marks =
         (req.body.marks || "board").trim();
 
-      // --------------------------------------------
+      // ==================================================
       // FULL ACCESS CODE
-      // --------------------------------------------
+      // ==================================================
 
       const accessCode =
         (
@@ -180,14 +222,16 @@ app.post(
         ).trim();
 
       const hasFullAccess =
-        FULL_ACCESS_CODE &&
-        accessCode === FULL_ACCESS_CODE;
+        !!(
+          FULL_ACCESS_CODE &&
+          accessCode === FULL_ACCESS_CODE
+        );
 
       const file = req.file;
 
-      // --------------------------------------------
-      // QUESTION / IMAGE CHECK
-      // --------------------------------------------
+      // ==================================================
+      // QUESTION / IMAGE VALIDATION
+      // ==================================================
 
       if (!question && !file) {
 
@@ -200,9 +244,9 @@ app.post(
 
       }
 
-      // --------------------------------------------
+      // ==================================================
       // IMAGE VALIDATION
-      // --------------------------------------------
+      // ==================================================
 
       if (file) {
 
@@ -222,13 +266,12 @@ app.post(
 
       }
 
-      // --------------------------------------------
+      // ==================================================
       // FREE LIMIT
-      // ONLY NORMAL STUDENTS
-      // FULL ACCESS USER = NO APP LIMIT
-      // --------------------------------------------
+      // ==================================================
 
-      const usage = getUsage(req);
+      const usage =
+        getUsage(req);
 
       if (!hasFullAccess) {
 
@@ -237,17 +280,21 @@ app.post(
           return res.status(429).json({
 
             error:
-              "આજે તમારી free limit પૂરી થઈ ગઈ છે. કાલે ફરી પ્રયાસ કરો.",
+              "આજે તમારી 20 પ્રશ્નોની મફત મર્યાદા પૂરી થઈ ગઈ છે. કાલે ફરી પ્રયાસ કરો.",
 
             usage: {
 
-              fullAccess: false,
+              fullAccess:
+                false,
 
-              dailyLimit: FREE_LIMIT,
+              dailyLimit:
+                FREE_LIMIT,
 
-              usedToday: usage.used,
+              usedToday:
+                usage.used,
 
-              remainingToday: 0
+              remainingToday:
+                0
 
             }
 
@@ -257,121 +304,199 @@ app.post(
 
       }
 
-      // --------------------------------------------
-      // GSEB TEACHER PROMPT
-      // --------------------------------------------
+      // ==================================================
+      // MASTER GSEB STUDY PROMPT
+      // ==================================================
 
       const prompt = `
 
 તમે Gujarat Secondary and Higher Secondary Education Board (GSEB)
-ધોરણ 10ના અનુભવી શિક્ષક છો.
+ધોરણ 10ના અનુભવી શિક્ષક અને Study Helper છો.
 
 વિષય: ${subject}
 
 જવાબનું સ્તર: ${marks}
 
-વિદ્યાર્થીનો પ્રશ્ન:
 
-${question || "(પ્રશ્ન ફોટામાંથી વાંચો)"}
+==================================================
+સૌથી મહત્વના OUTPUT RULES
+==================================================
+
+1) વિદ્યાર્થીને માત્ર FINAL ANSWER બતાવવો.
+
+2) ક્યારેય <think>, </think>, internal thinking,
+analysis, reasoning, planning અથવા modelની અંદરની વિચાર પ્રક્રિયા
+વિદ્યાર્થીને બતાવવી નહીં.
+
+3) "The user...", "Let's solve...", "I think...",
+"Wait...", "Actually...", "Final Plan...",
+"Analysis..." જેવી AIની અંદરની ભાષા outputમાં ક્યારેય ન આપવી.
+
+4) જવાબ સરળ, સ્વાભાવિક અને સંપૂર્ણ ગુજરાતી ભાષામાં આપવો.
+
+5) English sentence અથવા English paragraph ન લખવો.
+
+6) માત્ર જરૂરી technical terms, mathematical symbols,
+formulas, units અને standard scientific notation Englishમાં
+રાખી શકાય.
+
+7) જવાબ ધોરણ 10ના ગુજરાતી માધ્યમના વિદ્યાર્થીને સરળતાથી સમજાય
+એવી ભાષામાં હોવો જોઈએ.
+
+8) ફોટામાં પ્રશ્ન હોય તો ફોટો ધ્યાનથી વાંચવો.
+
+9) ફોટામાં એકથી વધુ પ્રશ્ન / sub-question દેખાય તો
+પ્રશ્નોને યોગ્ય ક્રમમાં ઓળખવા અને શક્ય હોય તેટલા બધા
+સ્પષ્ટ દેખાતા પ્રશ્નોના જવાબ આપવા.
+
+10) પોતાની તરફથી પ્રશ્ન પસંદ કરીને બીજા દેખાતા પ્રશ્નોને
+છોડી દેવા નહીં.
+
+11) જો ફોટાનો કોઈ ભાગ અસ્પષ્ટ હોય તો અંદાજથી પ્રશ્ન બનાવવો નહીં.
+માત્ર લખવું:
+"પ્રશ્નનો આ ભાગ ફોટામાં સ્પષ્ટ દેખાતો નથી."
+
+12) વિદ્યાર્થીને સીધો answer sheetમાં લખી શકાય એવો અંતિમ જવાબ આપવો.
+
+13) "આ પ્રશ્ન ચોક્કસ boardમાં આવશે" એવું ક્યારેય ન કહેવું.
+
+14) official GSEB Question Bankમાં હોવાનો પુરાવો ન હોય તો
+"આ Question Bankમાં છે" એવું claim ન કરવું.
+
+15) માહિતી ખાતરીથી ખબર ન હોય તો જવાબ બનાવવો નહીં.
 
 
-મુખ્ય નિયમો:
+==================================================
+ગણિત માટે ખાસ નિયમો
+==================================================
 
-1) ફોટામાં પ્રશ્ન હોય તો તેને ધ્યાનથી વાંચો.
-અસ્પષ્ટ હોય તો ambiguity સ્પષ્ટ કહો.
+ગણિતનો પ્રશ્ન હોય તો:
 
-2) જવાબ સરળ, સ્વાભાવિક ગુજરાતી ભાષામાં આપો.
-જરૂરી technical શબ્દ કૌંસમાં Englishમાં આપી શકો.
+Given / આપેલ
+Find / શોધવાનું
+Formula / સૂત્ર
+Substitution / મૂલ્યો મૂકવા
+Calculation / ગણતરી
+Final Answer / અંતિમ જવાબ
 
-3) GSEB ધોરણ 10ના board-styleમાં
-પરીક્ષામાં લખી શકાય એવો સીધો જવાબ આપો.
+આ ક્રમમાં સમજાવવો.
 
-4) 1/2/3/4 માર્ક મુજબ જવાબની
-લંબાઈ અને મુદ્દા રાખો.
+દરેક calculation ફરી ચકાસવી.
 
-5) ગણિત હોય તો:
+Final Answer સ્પષ્ટ રીતે આપવો.
 
-Given
-Find
-Formula
-Substitution
-Calculation
-Final Answer
-
-આ ક્રમમાં સમજાવો.
-
-ગણિતના formulas માટે LaTeX વાપરો.
-
-Inline formula:
+જરૂર હોય ત્યાં:
 
 \\( ... \\)
 
-Separate formula:
+અથવા
 
 \\[ ... \\]
 
-દરેક calculation ફરી ચકાસો.
+formula notation વાપરી શકાય.
 
-જો frequency, class interval, fi, xi, ui, fixi
-વગેરે હોય તો સાચી Markdown table બનાવો.
-
-6) વિજ્ઞાન અને સામાજિક વિજ્ઞાનમાં
-વ્યાખ્યા, કારણ, મુદ્દા, તફાવત વગેરે
-exam-friendly રીતે આપો.
-
-7) official GSEB Question Bankમાં હોવાનો પુરાવો ન હોય
-તો "Question Bankમાં ચોક્કસ છે" એવું claim ન કરો.
-
-8) "આ જ પ્રશ્ન boardમાં આવશે"
-એવું prediction ન આપો.
-
-9) માહિતી ખાતરીથી ખબર ન હોય
-તો બનાવશો નહીં.
-
-10) જવાબ સંપૂર્ણપણે ગુજરાતી ભાષામાં
-અને ધોરણ 10ના વિદ્યાર્થીને સમજાય
-એવી ભાષામાં આપો.
-
-11) ગણિતના જવાબમાં calculation ખૂબ ધ્યાનથી કરો.
-Final Answer આપતા પહેલાં calculation ફરી ચકાસો.
-
-12) ફોટામાં લખાણ હોય તો પહેલાં પ્રશ્નને યોગ્ય રીતે વાંચો
-અને પછી તેનો જવાબ આપો.
+Frequency, class interval, fi, xi, ui, fixi વગેરે
+હોય તો સાચી Markdown table બનાવવી.
 
 
-જવાબ આ formatમાં આપો:
+==================================================
+વિજ્ઞાન માટે
+==================================================
+
+વ્યાખ્યા,
+કારણ,
+મુખ્ય મુદ્દા,
+તફાવત,
+પ્રક્રિયા,
+સૂત્ર,
+ઉદાહરણ
+
+વગેરે exam-friendly રીતે આપો.
 
 
-## 💥 Exploding View
+==================================================
+સામાજિક વિજ્ઞાન માટે
+==================================================
+
+જવાબ મુદ્દાવાર આપો.
+
+જ્યાં જરૂરી હોય ત્યાં:
+
+• કારણ
+• પરિણામ
+• લક્ષણો
+• મહત્વ
+• તફાવત
+
+આ રીતે સમજાવો.
+
+
+==================================================
+જવાબનું FORMAT
+==================================================
+
+
+## 💥 પ્રશ્નને સરળ રીતે સમજીએ
 
 1. પ્રશ્ન શું પૂછે છે?
-2. જરૂરી concept / માહિતી
-3. Step-by-step સમજણ
-4. Final result / મુખ્ય મુદ્દો
+2. જરૂરી માહિતી / concept
+3. પગલુંવાર સમજણ
+4. અંતિમ પરિણામ / મુખ્ય મુદ્દો
 
 
 ## 📝 પરીક્ષામાં લખવાનો જવાબ
 
-વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો જવાબ.
+વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો
+સંપૂર્ણ અને યોગ્ય જવાબ.
 
 
 ## ⭐ મહત્વ
 
-Normal / Practice-important / Question-bank-related
+માત્ર યોગ્ય હોય ત્યારે નીચેમાંથી એક લખવું:
 
-માત્ર યોગ્ય હોય તે જ લખો
-અને ટૂંકું કારણ આપો.
+Normal
+
+Practice-important
+
+Question-bank-related
+
+અને એક ટૂંકું કારણ આપવું.
+
+જો મહત્વ નક્કી કરી શકાય નહીં તો
+કોઈ ખોટો claim ન કરવો.
 
 
 ## ⚠️ ધ્યાનમાં રાખવું
 
-માત્ર 1-3 મહત્વની ભૂલો અથવા tips.
+માત્ર 1 થી 3 મહત્વની ભૂલો અથવા tips.
+
+
+==================================================
+અંતિમ યાદ
+==================================================
+
+વિદ્યાર્થીને માત્ર તૈયાર જવાબ આપવો.
+
+કોઈ internal reasoning નહીં.
+
+કોઈ <think> નહીં.
+
+કોઈ AI planning નહીં.
+
+કોઈ English explanation નહીં.
+
+સરળ ગુજરાતી.
+
+ધોરણ 10 GSEB exam-friendly જવાબ.
+
+પ્રશ્ન ફોટામાં હોય તો પહેલા ફોટો વાંચવો,
+પછી જવાબ આપવો.
 
 `;
 
-      // --------------------------------------------
-      // GROQ MESSAGE CONTENT
-      // --------------------------------------------
+      // ==================================================
+      // GROQ CONTENT
+      // ==================================================
 
       const content = [
 
@@ -382,9 +507,9 @@ Normal / Practice-important / Question-bank-related
 
       ];
 
-      // --------------------------------------------
+      // ==================================================
       // IMAGE TO GROQ
-      // --------------------------------------------
+      // ==================================================
 
       if (file) {
 
@@ -396,11 +521,13 @@ Normal / Practice-important / Question-bank-related
 
         content.push({
 
-          type: "image_url",
+          type:
+            "image_url",
 
           image_url: {
 
-            url: imageDataUrl
+            url:
+              imageDataUrl
 
           }
 
@@ -408,63 +535,82 @@ Normal / Practice-important / Question-bank-related
 
       }
 
-      // --------------------------------------------
+      // ==================================================
       // GROQ API REQUEST
-      // --------------------------------------------
+      // ==================================================
 
-      const response = await fetch(
+      const response =
+        await fetch(
 
-        "https://api.groq.com/openai/v1/chat/completions",
+          "https://api.groq.com/openai/v1/chat/completions",
 
-        {
+          {
 
-          method: "POST",
+            method:
+              "POST",
 
-          headers: {
+            headers: {
 
-            "Content-Type":
-              "application/json",
+              "Content-Type":
+                "application/json",
 
-            "Authorization":
-              `Bearer ${apiKey}`
+              "Authorization":
+                `Bearer ${apiKey}`
 
-          },
+            },
 
-          body: JSON.stringify({
+            body:
+              JSON.stringify({
 
-            model:
-              "qwen/qwen3.6-27b",
+                model:
+                  "qwen/qwen3.6-27b",
 
-            messages: [
+                messages: [
 
-              {
+                  {
 
-                role: "user",
+                    role:
+                      "user",
 
-                content
+                    content
 
-              }
+                  }
 
-            ],
+                ],
 
-            temperature: 0.3,
+                temperature:
+                  0.3,
 
-            max_completion_tokens: 4096,
+                max_completion_tokens:
+                  8192,
 
-            stream: false
+                // Keep model reasoning for difficult
+                // math questions but DO NOT show it.
+                reasoning_effort:
+                  "default",
 
-          })
+                reasoning_format:
+                  "hidden",
 
-        }
+                stream:
+                  false
 
-      );
+              })
+
+          }
+
+        );
+
+      // ==================================================
+      // GROQ RESPONSE
+      // ==================================================
 
       const data =
         await response.json();
 
-      // --------------------------------------------
+      // ==================================================
       // GROQ ERROR
-      // --------------------------------------------
+      // ==================================================
 
       if (!response.ok) {
 
@@ -474,37 +620,51 @@ Normal / Practice-important / Question-bank-related
         );
 
         return res.status(
+
           response.status >= 400 &&
           response.status < 500
             ? response.status
             : 500
+
         ).json({
 
           error:
             data?.error?.message ||
-            "Groq API error આવ્યો."
+            "Groq API માં સમસ્યા આવી."
 
         });
 
       }
 
-      // --------------------------------------------
+      // ==================================================
       // EXTRACT ANSWER
-      // --------------------------------------------
+      // ==================================================
 
-      const answer =
+      let answer =
 
         data
           ?.choices?.[0]
           ?.message
-          ?.content ||
+          ?.content || "";
 
-        "જવાબ મળ્યો નથી.";
+      // ==================================================
+      // CLEAN ANSWER
+      // ==================================================
 
-      // --------------------------------------------
-      // COUNT ONLY NORMAL STUDENTS
+      answer =
+        cleanAnswer(answer);
+
+      if (!answer) {
+
+        answer =
+          "જવાબ મળ્યો નથી. કૃપા કરીને પ્રશ્ન ફરીથી મોકલો.";
+
+      }
+
+      // ==================================================
+      // COUNT USAGE
       // FULL ACCESS USER IS NOT COUNTED
-      // --------------------------------------------
+      // ==================================================
 
       let usedToday;
 
@@ -512,15 +672,22 @@ Normal / Practice-important / Question-bank-related
 
       if (hasFullAccess) {
 
-        usedToday = 0;
+        usedToday =
+          0;
 
-        remainingToday = "Unlimited";
+        remainingToday =
+          "Unlimited";
 
-      } else {
+      }
+
+      else {
 
         dailyUsage.set(
+
           usage.key,
+
           usage.used + 1
+
         );
 
         usedToday =
@@ -528,19 +695,23 @@ Normal / Practice-important / Question-bank-related
 
         remainingToday =
           Math.max(
+
             0,
+
             FREE_LIMIT - usedToday
+
           );
 
       }
 
-      // --------------------------------------------
-      // RESPONSE
-      // --------------------------------------------
+      // ==================================================
+      // FINAL RESPONSE
+      // ==================================================
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         answer,
 
@@ -550,6 +721,7 @@ Normal / Practice-important / Question-bank-related
             !!hasFullAccess,
 
           dailyLimit:
+
             hasFullAccess
               ? "Unlimited"
               : FREE_LIMIT,
@@ -563,6 +735,10 @@ Normal / Practice-important / Question-bank-related
       });
 
     }
+
+    // ==================================================
+    // SERVER ERROR
+    // ==================================================
 
     catch (error) {
 
@@ -583,9 +759,9 @@ Normal / Practice-important / Question-bank-related
   }
 );
 
-// --------------------------------------------------
+// ==================================================
 // START SERVER
-// --------------------------------------------------
+// ==================================================
 
 app.listen(
 
@@ -596,7 +772,9 @@ app.listen(
   () => {
 
     console.log(
+
       `GSEB Study Helper running on port ${PORT}`
+
     );
 
   }
