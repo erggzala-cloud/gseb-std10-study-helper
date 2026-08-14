@@ -1,654 +1,1076 @@
 <!doctype html>
 <html lang="gu">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>GSEB ધોરણ 10 • Study Helper</title>
+<meta charset="utf-8">
 
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(','\\)'], ['$', '$']],
-        displayMath: [['\\[','\\]'], ['$$','$$']]
-      },
-      svg: {
-        fontCache: 'global'
-      }
-    };
-  </script>
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1"
+>
 
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<title>GSEB ધોરણ 10 • Study Helper</title>
 
-  <style>
-    :root {
-      --bg: #f4f7fb;
-      --card: #ffffff;
-      --ink: #182230;
-      --muted: #657286;
-      --brand: #087ea4;
-      --brand2: #086b8b;
-      --line: #dce4ed;
-      --soft: #eaf6fb;
-      --danger: #c62828;
-      --success: #16834b;
-    }
+<script>
 
-    * {
-      box-sizing: border-box;
-    }
+window.MathJax = {
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: Arial, sans-serif;
-    }
+  tex: {
 
-    header {
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      color: white;
-      padding: 22px 18px;
-    }
+    inlineMath: [
+      ['\\(','\\)'],
+      ['$','$']
+    ],
 
-    header h1 {
-      margin: 0;
-      font-size: 25px;
-    }
+    displayMath: [
+      ['\\[','\\]'],
+      ['$$','$$']
+    ]
 
-    header p {
-      margin: 8px 0 0;
-      opacity: .9;
-      font-size: 15px;
-    }
+  },
 
-    main {
-      max-width: 850px;
-      margin: auto;
-      padding: 16px;
-    }
+  svg: {
+    fontCache: 'global'
+  }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.05);
-    }
+};
 
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
+</script>
 
-    select,
-    textarea,
-    input[type="text"] {
-      width: 100%;
-      border: 1px solid #ccd6e0;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 16px;
-      background: white;
-    }
+<script
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
 
-    textarea {
-      min-height: 150px;
-      resize: vertical;
-    }
+<style>
 
-    .field {
-      margin-bottom: 16px;
-    }
+:root {
 
-    .upload-box {
-      border: 2px dashed #b8c9d6;
-      border-radius: 16px;
-      padding: 18px;
-      text-align: center;
-      background: #f8fcfe;
-    }
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --ink:#182230;
+  --muted:#657286;
+  --brand:#087ea4;
+  --brand2:#086b8b;
+  --line:#dce4ed;
+  --soft:#eaf6fb;
+  --danger:#c62828;
+  --success:#16834b;
 
-    .upload-btn {
-      display: block;
-      background: var(--soft);
-      color: var(--brand2);
-      padding: 15px;
-      border-radius: 12px;
-      margin: 10px 0;
-      font-weight: bold;
-      cursor: pointer;
-    }
+}
 
-    input[type="file"] {
-      display: none;
-    }
+* {
+  box-sizing:border-box;
+}
 
-    .file-name {
-      color: var(--muted);
-      font-size: 14px;
-      margin-top: 8px;
-    }
+body {
 
-    .access-box {
-      background: #fff8e1;
-      border: 1px solid #f0d98c;
-      border-radius: 14px;
-      padding: 14px;
-    }
+  margin:0;
 
-    .access-box label {
-      color: #765800;
-    }
+  background:var(--bg);
 
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 14px;
-      padding: 16px;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+  color:var(--ink);
 
-    #solveBtn {
-      background: var(--brand);
-      color: white;
-    }
+  font-family:
+    Arial,
+    "Noto Sans Gujarati",
+    sans-serif;
 
-    #clearBtn {
-      margin-top: 10px;
-      background: var(--soft);
-      color: var(--brand2);
-    }
+}
 
-    button:disabled {
-      opacity: .6;
-    }
+header {
 
-    .status {
-      margin-top: 12px;
-      text-align: center;
-      color: var(--muted);
-    }
+  background:
+    linear-gradient(
+      135deg,
+      var(--brand),
+      var(--brand2)
+    );
 
-    .answer {
-      line-height: 1.75;
-      font-size: 16px;
-      overflow-wrap: anywhere;
-    }
+  color:white;
 
-    .answer h2,
-    .answer h3 {
-      color: var(--brand2);
-    }
+  padding:22px 18px;
 
-    .usage {
-      text-align: center;
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 10px;
-    }
+}
 
-    .full {
-      color: var(--success);
-      font-weight: bold;
-    }
+header h1 {
 
-    footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-      padding: 20px;
-    }
-  </style>
+  margin:0;
+
+  font-size:25px;
+
+}
+
+header p {
+
+  margin:8px 0 0;
+
+  opacity:.9;
+
+  font-size:15px;
+
+}
+
+main {
+
+  max-width:850px;
+
+  margin:auto;
+
+  padding:16px;
+
+}
+
+.card {
+
+  background:var(--card);
+
+  border:1px solid var(--line);
+
+  border-radius:18px;
+
+  padding:18px;
+
+  margin-bottom:16px;
+
+  box-shadow:
+    0 3px 12px rgba(0,0,0,.05);
+
+}
+
+label {
+
+  display:block;
+
+  font-weight:bold;
+
+  margin-bottom:8px;
+
+}
+
+select,
+textarea,
+input[type="text"] {
+
+  width:100%;
+
+  border:
+    1px solid #ccd6e0;
+
+  border-radius:12px;
+
+  padding:14px;
+
+  font-size:16px;
+
+  background:white;
+
+}
+
+textarea {
+
+  min-height:150px;
+
+  resize:vertical;
+
+}
+
+.field {
+
+  margin-bottom:16px;
+
+}
+
+.upload-box {
+
+  border:
+    2px dashed #b8c9d6;
+
+  border-radius:16px;
+
+  padding:18px;
+
+  text-align:center;
+
+  background:#f8fcfe;
+
+}
+
+.upload-btn {
+
+  display:block;
+
+  background:var(--soft);
+
+  color:var(--brand2);
+
+  padding:15px;
+
+  border-radius:12px;
+
+  margin:10px 0;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+input[type="file"] {
+
+  display:none;
+
+}
+
+.file-name {
+
+  color:var(--muted);
+
+  font-size:14px;
+
+  margin-top:8px;
+
+}
+
+.access-box {
+
+  background:#fff8e1;
+
+  border:
+    1px solid #f0d98c;
+
+  border-radius:14px;
+
+  padding:14px;
+
+}
+
+.access-box label {
+
+  color:#765800;
+
+}
+
+button {
+
+  width:100%;
+
+  border:0;
+
+  border-radius:14px;
+
+  padding:16px;
+
+  font-size:17px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+#solveBtn {
+
+  background:var(--brand);
+
+  color:white;
+
+}
+
+#clearBtn {
+
+  margin-top:10px;
+
+  background:var(--soft);
+
+  color:var(--brand2);
+
+}
+
+button:disabled {
+
+  opacity:.6;
+
+}
+
+.status {
+
+  margin-top:12px;
+
+  text-align:center;
+
+  color:var(--muted);
+
+}
+
+.answer {
+
+  line-height:1.75;
+
+  font-size:16px;
+
+  overflow-wrap:anywhere;
+
+}
+
+.answer h2,
+.answer h3 {
+
+  color:var(--brand2);
+
+}
+
+.answer ul {
+
+  padding-left:25px;
+
+}
+
+.answer table {
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  margin:15px 0;
+
+}
+
+.answer th,
+.answer td {
+
+  border:
+    1px solid #ccd6e0;
+
+  padding:8px;
+
+  text-align:center;
+
+}
+
+.answer th {
+
+  background:var(--soft);
+
+}
+
+.usage {
+
+  text-align:center;
+
+  font-size:14px;
+
+  color:var(--muted);
+
+  margin-top:10px;
+
+}
+
+.full {
+
+  color:var(--success);
+
+  font-weight:bold;
+
+}
+
+footer {
+
+  text-align:center;
+
+  color:var(--muted);
+
+  font-size:13px;
+
+  padding:20px;
+
+}
+
+@media(max-width:600px) {
+
+  main {
+    padding:10px;
+  }
+
+  .card {
+    padding:14px;
+  }
+
+}
+
+</style>
+
 </head>
 
 <body>
 
 <header>
-  <h1>📚 GSEB ધોરણ 10 Study Helper</h1>
-  <p>Board-style Answer • ગુજરાતી • Maths Steps • Exploding View</p>
+
+<h1>
+📚 GSEB ધોરણ 10 Study Helper
+</h1>
+
+<p id="headerText">
+Board-style Answer • ગુજરાતી • Maths Steps • Exploding View
+</p>
+
 </header>
 
 <main>
 
-  <div class="card">
+<!-- SUBJECT -->
 
-    <div class="field">
-      <label>📘 વિષય</label>
+<div class="card">
 
-      <select id="subject">
-        <option value="ગુજરાતી">ગુજરાતી</option>
-        <option value="અંગ્રેજી">અંગ્રેજી</option>
-        <option value="ગણિત">ગણિત</option>
-        <option value="વિજ્ઞાન">વિજ્ઞાન</option>
-        <option value="સામાજિક વિજ્ઞાન">સામાજિક વિજ્ઞાન</option>
-        <option value="સંસ્કૃત">સંસ્કૃત</option>
-        <option value="અન્ય">અન્ય</option>
-      </select>
-    </div>
+<div class="field">
 
-    <div class="field">
-      <label>🎯 જવાબનું સ્તર</label>
+<label>
+📘 વિષય
+</label>
 
-      <select id="marks">
-        <option value="1 માર્ક">1 માર્ક</option>
-        <option value="2 માર્ક">2 માર્ક</option>
-        <option value="3 માર્ક">3 માર્ક</option>
-        <option value="4 માર્ક">4 માર્ક</option>
-        <option value="વિગતવાર સમજણ" selected>વિગતવાર સમજણ</option>
-      </select>
-    </div>
+<select id="subject">
 
-  </div>
+<option value="ગુજરાતી">
+ગુજરાતી
+</option>
 
-  <div class="card">
+<option value="અંગ્રેજી">
+અંગ્રેજી
+</option>
 
-    <div class="field">
-      <label>✍️ પ્રશ્ન લખો</label>
+<option value="ગણિત">
+ગણિત
+</option>
 
-      <textarea
-        id="question"
-        placeholder="અહીં તમારો પ્રશ્ન લખો..."
-      ></textarea>
-    </div>
+<option value="વિજ્ઞાન">
+વિજ્ઞાન
+</option>
 
-    <div class="upload-box">
+<option value="સામાજિક વિજ્ઞાન">
+સામાજિક વિજ્ઞાન
+</option>
 
-      <b>📷 પ્રશ્નનો ફોટો / Screenshot</b>
+<option value="સંસ્કૃત">
+સંસ્કૃત
+</option>
 
-      <label class="upload-btn">
-        🖼️ Galleryમાંથી ફોટો લો
-        <input
-          id="image"
-          type="file"
-          accept="image/*"
-        >
-      </label>
+<option value="અન્ય">
+અન્ય
+</option>
 
-      <label class="upload-btn">
-        📷 Cameraથી ફોટો લો
-        <input
-          id="camera"
-          type="file"
-          accept="image/*"
-          capture="environment"
-        >
-      </label>
+</select>
 
-      <div class="file-name" id="fileName">
-        કોઈ ફોટો પસંદ કરેલો નથી.
-      </div>
+</div>
 
-    </div>
+<div class="field">
 
-  </div>
+<label>
+🎯 જવાબનું સ્તર
+</label>
 
-  <div class="card">
+<select id="marks">
 
-    <div class="access-box">
+<option value="1 માર્ક">
+1 માર્ક
+</option>
 
-      <label>🔐 Full Access Code</label>
+<option value="2 માર્ક">
+2 માર્ક
+</option>
 
-      <input
-        id="fullAccessCode"
-        type="text"
-        placeholder="Full Access હોય તો code અહીં નાખો"
-        autocomplete="off"
-      >
+<option value="3 માર્ક">
+3 માર્ક
+</option>
 
-      <div style="font-size:13px;color:#765800;margin-top:8px;">
-        સામાન્ય વિદ્યાર્થી માટે આ field ખાલી રાખો.
-      </div>
+<option value="4 માર્ક">
+4 માર્ક
+</option>
 
-    </div>
+<option
+  value="વિગતવાર સમજણ"
+  selected
+>
+વિગતવાર સમજણ
+</option>
 
-  </div>
+</select>
 
-  <div class="card">
+</div>
 
-    <button id="solveBtn">
-      🚀 જવાબ બનાવો
-    </button>
+</div>
 
-    <button id="clearBtn">
-      🧹 Clear
-    </button>
+<!-- QUESTION -->
 
-    <div class="status" id="status"></div>
+<div class="card">
 
-  </div>
+<div class="field">
 
-  <div class="card" id="resultCard" style="display:none;">
+<label>
+✍️ પ્રશ્ન લખો
+</label>
 
-    <div class="answer" id="answer"></div>
+<textarea
+  id="question"
+  placeholder="અહીં તમારો પ્રશ્ન લખો..."
+></textarea>
 
-    <div class="usage" id="usage"></div>
+</div>
 
-  </div>
+<div class="upload-box">
+
+<b>
+📷 પ્રશ્નનો ફોટો / Screenshot
+</b>
+
+<label class="upload-btn">
+
+🖼️ Galleryમાંથી ફોટો લો
+
+<input
+  id="image"
+  type="file"
+  accept="image/*"
+>
+
+</label>
+
+<label class="upload-btn">
+
+📷 Cameraથી ફોટો લો
+
+<input
+  id="camera"
+  type="file"
+  accept="image/*"
+  capture="environment"
+>
+
+</label>
+
+<div
+  class="file-name"
+  id="fileName"
+>
+કોઈ ફોટો પસંદ કરેલો નથી.
+</div>
+
+</div>
+
+</div>
+
+<!-- FULL ACCESS -->
+
+<div
+  class="card"
+  id="accessCard"
+>
+
+<div class="access-box">
+
+<label>
+🔐 Full Access Code
+</label>
+
+<input
+  id="fullAccessCode"
+  type="text"
+  placeholder="Full Access હોય તો code અહીં નાખો"
+  autocomplete="off"
+>
+
+<div
+  id="accessHelp"
+  style="
+    font-size:13px;
+    color:#765800;
+    margin-top:8px;
+  "
+>
+Full Access link પર સાચો code નાખવાથી
+20 પ્રશ્નોની app limit લાગશે નહીં.
+</div>
+
+</div>
+
+</div>
+
+<!-- BUTTON -->
+
+<div class="card">
+
+<button id="solveBtn">
+
+🚀 જવાબ બનાવો
+
+</button>
+
+<button id="clearBtn">
+
+🧹 Clear
+
+</button>
+
+<div
+  class="status"
+  id="status">
+</div>
+
+</div>
+
+<!-- RESULT -->
+
+<div
+  class="card"
+  id="resultCard"
+  style="display:none;"
+>
+
+<div
+  class="answer"
+  id="answer">
+</div>
+
+<div
+  class="usage"
+  id="usage">
+</div>
+
+</div>
 
 </main>
 
 <footer>
-  GSEB official Question Bank / syllabus સાથે final cross-check કરવો.<br>
-  Exact board-paper predictionની guarantee નથી.
+
+GSEB official Question Bank / syllabus સાથે
+final cross-check કરવો.
+
+<br>
+
+Exact board-paper predictionની guarantee નથી.
+
 </footer>
 
 <script>
 
-  const API_URL = "/api/solve";
+// ==================================================
+// PAGE MODE
+// ==================================================
 
-  const questionEl =
-    document.getElementById("question");
+const isFullPage =
+  window.location.pathname === "/full";
 
-  const subjectEl =
-    document.getElementById("subject");
+// ==================================================
+// API
+// ==================================================
 
-  const marksEl =
-    document.getElementById("marks");
+const API_URL =
+  "/api/solve";
 
-  const imageEl =
-    document.getElementById("image");
+// ==================================================
+// ELEMENTS
+// ==================================================
 
-  const cameraEl =
-    document.getElementById("camera");
+const questionEl =
+  document.getElementById("question");
 
-  const accessEl =
-    document.getElementById("fullAccessCode");
+const subjectEl =
+  document.getElementById("subject");
 
-  const fileNameEl =
-    document.getElementById("fileName");
+const marksEl =
+  document.getElementById("marks");
 
-  const solveBtn =
-    document.getElementById("solveBtn");
+const imageEl =
+  document.getElementById("image");
 
-  const clearBtn =
-    document.getElementById("clearBtn");
+const cameraEl =
+  document.getElementById("camera");
 
-  const statusEl =
-    document.getElementById("status");
+const accessEl =
+  document.getElementById("fullAccessCode");
 
-  const resultCard =
-    document.getElementById("resultCard");
+const accessCard =
+  document.getElementById("accessCard");
 
-  const answerEl =
-    document.getElementById("answer");
+const accessHelp =
+  document.getElementById("accessHelp");
 
-  const usageEl =
-    document.getElementById("usage");
+const headerText =
+  document.getElementById("headerText");
 
+const fileNameEl =
+  document.getElementById("fileName");
 
-  function showFile(file) {
+const solveBtn =
+  document.getElementById("solveBtn");
 
-    if (file) {
-      fileNameEl.textContent =
-        "📎 " + file.name;
-    } else {
-      fileNameEl.textContent =
-        "કોઈ ફોટો પસંદ કરેલો નથી.";
-    }
+const clearBtn =
+  document.getElementById("clearBtn");
+
+const statusEl =
+  document.getElementById("status");
+
+const resultCard =
+  document.getElementById("resultCard");
+
+const answerEl =
+  document.getElementById("answer");
+
+const usageEl =
+  document.getElementById("usage");
+
+// ==================================================
+// LIMITED / FULL UI
+// ==================================================
+
+if (isFullPage) {
+
+  headerText.textContent =
+    "👑 Full Access • GSEB ધોરણ 10 Study Helper";
+
+  accessHelp.textContent =
+    "Full Access Code નાખીને Unlimited app access મેળવો.";
+
+}
+
+else {
+
+  accessCard.style.display =
+    "none";
+
+}
+
+// ==================================================
+// FILE NAME
+// ==================================================
+
+function showFile(file) {
+
+  if (file) {
+
+    fileNameEl.textContent =
+      "📎 " + file.name;
 
   }
 
+  else {
 
-  imageEl.addEventListener(
-    "change",
-    () => showFile(imageEl.files[0])
+    fileNameEl.textContent =
+      "કોઈ ફોટો પસંદ કરેલો નથી.";
+
+  }
+
+}
+
+imageEl.addEventListener(
+  "change",
+  () => showFile(imageEl.files[0])
+);
+
+cameraEl.addEventListener(
+  "change",
+  () => showFile(cameraEl.files[0])
+);
+
+// ==================================================
+// SOLVE
+// ==================================================
+
+async function solve() {
+
+  const question =
+    questionEl.value.trim();
+
+  const imageFile =
+    imageEl.files[0] ||
+    cameraEl.files[0];
+
+  if (!question && !imageFile) {
+
+    alert(
+      "પહેલા પ્રશ્ન લખો અથવા ફોટો પસંદ કરો."
+    );
+
+    return;
+
+  }
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "question",
+    question
   );
 
-
-  cameraEl.addEventListener(
-    "change",
-    () => showFile(cameraEl.files[0])
+  formData.append(
+    "subject",
+    subjectEl.value
   );
 
+  formData.append(
+    "marks",
+    marksEl.value
+  );
 
-  async function solve() {
-
-    const question =
-      questionEl.value.trim();
-
-    const imageFile =
-      imageEl.files[0] ||
-      cameraEl.files[0];
-
-    if (!question && !imageFile) {
-
-      alert(
-        "પહેલા પ્રશ્ન લખો અથવા ફોટો પસંદ કરો."
-      );
-
-      return;
-    }
-
-
-    const formData =
-      new FormData();
-
-    formData.append(
-      "question",
-      question
-    );
-
-    formData.append(
-      "subject",
-      subjectEl.value
-    );
-
-    formData.append(
-      "marks",
-      marksEl.value
-    );
+  if (isFullPage) {
 
     formData.append(
       "fullAccessCode",
       accessEl.value.trim()
     );
 
+  }
 
-    if (imageFile) {
+  if (imageFile) {
 
-      formData.append(
-        "image",
-        imageFile
+    formData.append(
+      "image",
+      imageFile
+    );
+
+  }
+
+  solveBtn.disabled =
+    true;
+
+  statusEl.textContent =
+    "⏳ જવાબ તૈયાર થઈ રહ્યો છે...";
+
+  resultCard.style.display =
+    "none";
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method:"POST",
+          body:formData
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data?.error ||
+        "કોઈ સમસ્યા આવી."
       );
 
     }
 
+    answerEl.innerHTML =
+      formatAnswer(
+        data.answer ||
+        "જવાબ મળ્યો નથી."
+      );
 
-    solveBtn.disabled = true;
+    if (
+      data.usage &&
+      data.usage.fullAccess
+    ) {
+
+      usageEl.innerHTML =
+        '<span class="full">👑 Full Access Active • Unlimited Questions</span>';
+
+    }
+
+    else if (data.usage) {
+
+      usageEl.textContent =
+        "આજે બાકી પ્રશ્નો: " +
+        data.usage.remainingToday;
+
+    }
+
+    else {
+
+      usageEl.textContent =
+        "";
+
+    }
+
+    resultCard.style.display =
+      "block";
 
     statusEl.textContent =
-      "⏳ જવાબ તૈયાર થઈ રહ્યો છે...";
+      "✅ જવાબ તૈયાર છે.";
+
+    if (
+      window.MathJax &&
+      MathJax.typesetPromise
+    ) {
+
+      try {
+
+        await MathJax.typesetPromise(
+          [answerEl]
+        );
+
+      }
+
+      catch (e) {
+
+        console.warn(
+          "MathJax error:",
+          e
+        );
+
+      }
+
+    }
+
+  }
+
+  catch (error) {
+
+    statusEl.textContent =
+      "";
+
+    alert(
+      error.message ||
+      "Serverમાં સમસ્યા આવી."
+    );
+
+  }
+
+  finally {
+
+    solveBtn.disabled =
+      false;
+
+  }
+
+}
+
+// ==================================================
+// FORMAT ANSWER
+// ==================================================
+
+function formatAnswer(text) {
+
+  let html =
+    String(text || "");
+
+  // Escape HTML
+  html =
+    html.replace(
+      /&/g,
+      "&amp;"
+    );
+
+  html =
+    html.replace(
+      /</g,
+      "&lt;"
+    );
+
+  html =
+    html.replace(
+      />/g,
+      "&gt;"
+    );
+
+  // Bold
+  html =
+    html.replace(
+      /\*\*(.*?)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+  // Headings
+  html =
+    html.replace(
+      /^### (.*)$/gm,
+      "<h3>$1</h3>"
+    );
+
+  html =
+    html.replace(
+      /^## (.*)$/gm,
+      "<h2>$1</h2>"
+    );
+
+  html =
+    html.replace(
+      /^# (.*)$/gm,
+      "<h2>$1</h2>"
+    );
+
+  // Markdown bullet
+  html =
+    html.replace(
+      /^\s*[-•]\s+(.*)$/gm,
+      "<li>$1</li>"
+    );
+
+  // Ordered steps
+  html =
+    html.replace(
+      /^\s*(\d+)\.\s+(.*)$/gm,
+      "<div><strong>$1.</strong> $2</div>"
+    );
+
+  // New lines
+  html =
+    html.replace(
+      /\n/g,
+      "<br>"
+    );
+
+  return html;
+
+}
+
+// ==================================================
+// BUTTONS
+// ==================================================
+
+solveBtn.addEventListener(
+  "click",
+  solve
+);
+
+clearBtn.addEventListener(
+  "click",
+  () => {
+
+    questionEl.value =
+      "";
+
+    imageEl.value =
+      "";
+
+    cameraEl.value =
+      "";
+
+    accessEl.value =
+      "";
+
+    fileNameEl.textContent =
+      "કોઈ ફોટો પસંદ કરેલો નથી.";
+
+    answerEl.innerHTML =
+      "";
+
+    usageEl.textContent =
+      "";
+
+    statusEl.textContent =
+      "";
 
     resultCard.style.display =
       "none";
 
-
-    try {
-
-      const response =
-        await fetch(
-          API_URL,
-          {
-            method: "POST",
-            body: formData
-          }
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          data?.error ||
-          "કોઈ સમસ્યા આવી."
-        );
-
-      }
-
-
-      answerEl.innerHTML =
-        formatAnswer(
-          data.answer ||
-          "જવાબ મળ્યો નથી."
-        );
-
-
-      if (
-        data.usage &&
-        data.usage.fullAccess
-      ) {
-
-        usageEl.innerHTML =
-          '<span class="full">👑 Full Access Active • Unlimited Questions</span>';
-
-      } else if (data.usage) {
-
-        usageEl.textContent =
-          "આજે બાકી પ્રશ્નો: " +
-          data.usage.remainingToday;
-
-      } else {
-
-        usageEl.textContent = "";
-
-      }
-
-
-      resultCard.style.display =
-        "block";
-
-      statusEl.textContent =
-        "✅ જવાબ તૈયાર છે.";
-
-
-      if (window.MathJax) {
-
-        MathJax.typesetPromise();
-
-      }
-
-    }
-
-    catch (error) {
-
-      statusEl.textContent = "";
-
-      alert(
-        error.message ||
-        "Serverમાં સમસ્યા આવી."
-      );
-
-    }
-
-    finally {
-
-      solveBtn.disabled = false;
-
-    }
-
   }
-
-
-  function formatAnswer(text) {
-
-    let html =
-      String(text);
-
-    html =
-      html.replace(
-        /&/g,
-        "&amp;"
-      );
-
-    html =
-      html.replace(
-        /</g,
-        "&lt;"
-      );
-
-    html =
-      html.replace(
-        />/g,
-        "&gt;"
-      );
-
-    html =
-      html.replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong>$1</strong>"
-      );
-
-    html =
-      html.replace(
-        /^### (.*)$/gm,
-        "<h3>$1</h3>"
-      );
-
-    html =
-      html.replace(
-        /^## (.*)$/gm,
-        "<h2>$1</h2>"
-      );
-
-    html =
-      html.replace(
-        /^# (.*)$/gm,
-        "<h2>$1</h2>"
-      );
-
-    html =
-      html.replace(
-        /\n/g,
-        "<br>"
-      );
-
-    return html;
-
-  }
-
-
-  solveBtn.addEventListener(
-    "click",
-    solve
-  );
-
-
-  clearBtn.addEventListener(
-    "click",
-    () => {
-
-      questionEl.value = "";
-
-      imageEl.value = "";
-
-      cameraEl.value = "";
-
-      accessEl.value = "";
-
-      fileNameEl.textContent =
-        "કોઈ ફોટો પસંદ કરેલો નથી.";
-
-      answerEl.innerHTML = "";
-
-      usageEl.textContent = "";
-
-      statusEl.textContent = "";
-
-      resultCard.style.display =
-        "none";
-
-    }
-  );
+);
 
 </script>
 
 </body>
+
 </html>
