@@ -158,7 +158,7 @@ app.get("/", (req, res) => {
   );
 
   res.sendFile(
-    path.join(process.cwd(), "index.html")
+    path.join(process.cwd(), "full.html")
   );
 
 });
