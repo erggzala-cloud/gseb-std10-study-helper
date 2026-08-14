@@ -43,6 +43,10 @@ const FREE_LIMIT = 20;
 const FULL_ACCESS_CODE =
   process.env.FULL_ACCESS_CODE || "";
 
+// --------------------------------------------------
+// CLIENT IP
+// --------------------------------------------------
+
 function getClientIp(req) {
 
   return (
@@ -57,6 +61,10 @@ function getClientIp(req) {
 
 }
 
+// --------------------------------------------------
+// TODAY
+// --------------------------------------------------
+
 function getToday() {
 
   const now = new Date();
@@ -70,6 +78,10 @@ function getToday() {
   );
 
 }
+
+// --------------------------------------------------
+// USAGE
+// --------------------------------------------------
 
 function getUsage(req) {
 
@@ -126,18 +138,18 @@ app.post(
     try {
 
       // --------------------------------------------
-      // GEMINI API KEY
+      // GROQ API KEY
       // --------------------------------------------
 
       const apiKey =
-        process.env.GEMINI_API_KEY;
+        process.env.GROQ_API_KEY;
 
       if (!apiKey) {
 
         return res.status(500).json({
 
           error:
-            "GEMINI_API_KEY Render Environment Variablesમાં set કરેલી નથી."
+            "GROQ_API_KEY Render Environment Variablesમાં set કરેલી નથી."
 
         });
 
@@ -172,6 +184,10 @@ app.post(
         accessCode === FULL_ACCESS_CODE;
 
       const file = req.file;
+
+      // --------------------------------------------
+      // QUESTION / IMAGE CHECK
+      // --------------------------------------------
 
       if (!question && !file) {
 
@@ -209,6 +225,7 @@ app.post(
       // --------------------------------------------
       // FREE LIMIT
       // ONLY NORMAL STUDENTS
+      // FULL ACCESS USER = NO APP LIMIT
       // --------------------------------------------
 
       const usage = getUsage(req);
@@ -315,6 +332,12 @@ exam-friendly રીતે આપો.
 અને ધોરણ 10ના વિદ્યાર્થીને સમજાય
 એવી ભાષામાં આપો.
 
+11) ગણિતના જવાબમાં calculation ખૂબ ધ્યાનથી કરો.
+Final Answer આપતા પહેલાં calculation ફરી ચકાસો.
+
+12) ફોટામાં લખાણ હોય તો પહેલાં પ્રશ્નને યોગ્ય રીતે વાંચો
+અને પછી તેનો જવાબ આપો.
+
 
 જવાબ આ formatમાં આપો:
 
@@ -347,29 +370,37 @@ Normal / Practice-important / Question-bank-related
 `;
 
       // --------------------------------------------
-      // GEMINI CONTENT
+      // GROQ MESSAGE CONTENT
       // --------------------------------------------
 
-      const parts = [
+      const content = [
+
         {
+          type: "text",
           text: prompt
         }
+
       ];
 
       // --------------------------------------------
-      // IMAGE TO GEMINI
+      // IMAGE TO GROQ
       // --------------------------------------------
 
       if (file) {
 
-        parts.push({
+        const base64Image =
+          file.buffer.toString("base64");
 
-          inline_data: {
+        const imageDataUrl =
+          `data:${file.mimetype};base64,${base64Image}`;
 
-            mime_type: file.mimetype,
+        content.push({
 
-            data:
-              file.buffer.toString("base64")
+          type: "image_url",
+
+          image_url: {
+
+            url: imageDataUrl
 
           }
 
@@ -378,12 +409,12 @@ Normal / Practice-important / Question-bank-related
       }
 
       // --------------------------------------------
-      // GEMINI API REQUEST
+      // GROQ API REQUEST
       // --------------------------------------------
 
       const response = await fetch(
 
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "https://api.groq.com/openai/v1/chat/completions",
 
         {
 
@@ -394,32 +425,33 @@ Normal / Practice-important / Question-bank-related
             "Content-Type":
               "application/json",
 
-            "x-goog-api-key":
-              apiKey
+            "Authorization":
+              `Bearer ${apiKey}`
 
           },
 
           body: JSON.stringify({
 
-            contents: [
+            model:
+              "qwen/qwen3.6-27b",
+
+            messages: [
 
               {
 
                 role: "user",
 
-                parts
+                content
 
               }
 
             ],
 
-            generationConfig: {
+            temperature: 0.3,
 
-              temperature: 0.3,
+            max_completion_tokens: 4096,
 
-              maxOutputTokens: 4096
-
-            }
+            stream: false
 
           })
 
@@ -431,21 +463,26 @@ Normal / Practice-important / Question-bank-related
         await response.json();
 
       // --------------------------------------------
-      // GEMINI ERROR
+      // GROQ ERROR
       // --------------------------------------------
 
       if (!response.ok) {
 
         console.error(
-          "Gemini API Error:",
+          "Groq API Error:",
           data
         );
 
-        return res.status(500).json({
+        return res.status(
+          response.status >= 400 &&
+          response.status < 500
+            ? response.status
+            : 500
+        ).json({
 
           error:
             data?.error?.message ||
-            "Gemini API error આવ્યો."
+            "Groq API error આવ્યો."
 
         });
 
@@ -458,10 +495,9 @@ Normal / Practice-important / Question-bank-related
       const answer =
 
         data
-          ?.candidates?.[0]
-          ?.content?.parts
-          ?.map(part => part.text || "")
-          ?.join("") ||
+          ?.choices?.[0]
+          ?.message
+          ?.content ||
 
         "જવાબ મળ્યો નથી.";
 
@@ -471,6 +507,7 @@ Normal / Practice-important / Question-bank-related
       // --------------------------------------------
 
       let usedToday;
+
       let remainingToday;
 
       if (hasFullAccess) {
@@ -509,7 +546,8 @@ Normal / Practice-important / Question-bank-related
 
         usage: {
 
-          fullAccess: !!hasFullAccess,
+          fullAccess:
+            !!hasFullAccess,
 
           dailyLimit:
             hasFullAccess
