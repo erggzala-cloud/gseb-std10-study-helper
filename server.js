@@ -33,9 +33,9 @@ const upload = multer({
 // SETTINGS
 // ==================================================
 
-const dailyUsage = new Map();
-
 const FREE_LIMIT = 20;
+
+const dailyUsage = new Map();
 
 const FULL_ACCESS_CODE =
   process.env.FULL_ACCESS_CODE || "";
@@ -45,6 +45,7 @@ const FULL_ACCESS_CODE =
 // ==================================================
 
 function getClientIp(req) {
+
   return (
     req.ip ||
     req.headers["x-forwarded-for"] ||
@@ -54,6 +55,7 @@ function getClientIp(req) {
     .toString()
     .split(",")[0]
     .trim();
+
 }
 
 // ==================================================
@@ -61,6 +63,7 @@ function getClientIp(req) {
 // ==================================================
 
 function getToday() {
+
   const now = new Date();
 
   return (
@@ -70,6 +73,7 @@ function getToday() {
     "-" +
     String(now.getUTCDate()).padStart(2, "0")
   );
+
 }
 
 // ==================================================
@@ -77,23 +81,31 @@ function getToday() {
 // ==================================================
 
 function getUsage(req) {
+
   const ip = getClientIp(req);
 
   const today = getToday();
 
-  const key = ip + "_" + today;
+  const key =
+    ip + "_" + today;
 
   return {
+
     key,
-    used: dailyUsage.get(key) || 0
+
+    used:
+      dailyUsage.get(key) || 0
+
   };
+
 }
 
 // ==================================================
-// COOKIE MODE
+// ACCESS MODE
 // ==================================================
 
 function getAccessMode(req) {
+
   const cookie =
     req.headers.cookie || "";
 
@@ -105,13 +117,15 @@ function getAccessMode(req) {
   return match
     ? decodeURIComponent(match[1])
     : "limited";
+
 }
 
 // ==================================================
-// CLEAN AI OUTPUT
+// CLEAN ANSWER
 // ==================================================
 
 function cleanAnswer(text) {
+
   let answer =
     String(text || "");
 
@@ -134,6 +148,7 @@ function cleanAnswer(text) {
     );
 
   return answer.trim();
+
 }
 
 // ==================================================
@@ -141,37 +156,49 @@ function cleanAnswer(text) {
 // ==================================================
 
 app.get("/", (req, res) => {
+
   res.setHeader(
     "Set-Cookie",
     "access_mode=limited; Path=/; HttpOnly; SameSite=Lax"
   );
 
   res.sendFile(
-    path.join(process.cwd(), "full.html")
+    path.join(
+      process.cwd(),
+      "full.html"
+    )
   );
+
 });
 
 // ==================================================
-// FULL ACCESS WEBSITE
+// FULL WEBSITE
 // ==================================================
 
 app.get("/full", (req, res) => {
+
   res.setHeader(
     "Set-Cookie",
     "access_mode=full; Path=/; HttpOnly; SameSite=Lax"
   );
 
   res.sendFile(
-    path.join(process.cwd(), "index.html")
+    path.join(
+      process.cwd(),
+      "index.html"
+    )
   );
+
 });
 
 // ==================================================
-// HEALTH CHECK
+// HEALTH
 // ==================================================
 
 app.get("/api/health", (req, res) => {
+
   res.json({
+
     success: true,
 
     service:
@@ -179,24 +206,30 @@ app.get("/api/health", (req, res) => {
 
     status:
       "running"
+
   });
+
 });
 
 // ==================================================
-// MAIN SOLVE API
-// IMPORTANT:
-// /api/solve AND /api/full-solve BOTH WORK
+// MAIN API
+// BOTH ENDPOINTS WORK
 // ==================================================
 
 app.post(
-  ["/api/solve", "/api/full-solve"],
+  [
+    "/api/solve",
+    "/api/full-solve"
+  ],
+
   upload.single("image"),
+
   async (req, res) => {
 
     try {
 
       // ==================================================
-      // GROQ API KEY
+      // GROQ KEY
       // ==================================================
 
       const apiKey =
@@ -214,7 +247,7 @@ app.post(
       }
 
       // ==================================================
-      // REQUEST DATA
+      // INPUT
       // ==================================================
 
       const question =
@@ -237,15 +270,11 @@ app.post(
         req.file;
 
       // ==================================================
-      // PAGE MODE
+      // ACCESS MODE
       // ==================================================
 
       const accessMode =
         getAccessMode(req);
-
-      // Full access ONLY when:
-      // 1. User is on /full
-      // 2. Correct Full Access Code is entered
 
       const hasFullAccess =
         accessMode === "full" &&
@@ -253,7 +282,7 @@ app.post(
         accessCode === FULL_ACCESS_CODE;
 
       // ==================================================
-      // QUESTION VALIDATION
+      // QUESTION CHECK
       // ==================================================
 
       if (!question && !file) {
@@ -268,7 +297,7 @@ app.post(
       }
 
       // ==================================================
-      // IMAGE VALIDATION
+      // IMAGE CHECK
       // ==================================================
 
       if (file) {
@@ -290,7 +319,7 @@ app.post(
       }
 
       // ==================================================
-      // NORMAL USER LIMIT
+      // DAILY LIMIT
       // ==================================================
 
       const usage =
@@ -298,7 +327,9 @@ app.post(
 
       if (!hasFullAccess) {
 
-        if (usage.used >= FREE_LIMIT) {
+        if (
+          usage.used >= FREE_LIMIT
+        ) {
 
           return res.status(429).json({
 
@@ -329,60 +360,30 @@ app.post(
 
       // ==================================================
       // GSEB MASTER PROMPT
+      // SHORT + STRONG
       // ==================================================
 
       const prompt = `
 
-તમે GSEB ધોરણ 10ના અનુભવી શિક્ષક અને Study Helper છો.
+તમે GSEB ધોરણ 10ના અનુભવી ગુજરાતી માધ્યમના શિક્ષક છો.
 
 વિષય: ${subject}
-
 જવાબનું સ્તર: ${marks}
 
+વિદ્યાર્થીનો પ્રશ્ન:
+${question || "પ્રશ્ન ફોટામાંથી વાંચો."}
 
-==============================
-ખૂબ મહત્વના OUTPUT RULES
-==============================
+મુખ્ય નિયમો:
 
-1) વિદ્યાર્થીને માત્ર final answer બતાવો.
-
-2) <think>, </think>, internal thinking, analysis,
-reasoning, planning અથવા AIની અંદરની વિચાર પ્રક્રિયા
-ક્યારેય બતાવશો નહીં.
-
-3) "The user", "Let's solve", "I think",
-"Wait", "Actually", "Analysis", "Final Plan"
-જેવી AIની અંદરની ભાષા ન આપવી.
-
-4) જવાબ સરળ, સ્વાભાવિક ગુજરાતી ભાષામાં આપવો.
-
-5) English sentence અથવા English paragraph ન આપવો.
-
-6) જરૂરી technical શબ્દો, formulas, mathematical symbols
-અને scientific units English/standard notationમાં રાખી શકાય.
-
-7) ધોરણ 10ના વિદ્યાર્થીને સરળતાથી સમજાય એવી ભાષા વાપરો.
-
-8) ફોટામાં પ્રશ્ન હોય તો પહેલાં ફોટો ધ્યાનથી વાંચો.
-
-9) ફોટામાં એકથી વધુ સ્પષ્ટ પ્રશ્નો હોય તો બધા પ્રશ્નોને
-યોગ્ય ક્રમમાં ઓળખીને જવાબ આપો.
-
-10) અસ્પષ્ટ ભાગ હોય તો અંદાજથી જવાબ ન બનાવવો.
-
-11) વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો જવાબ આપવો.
-
-12) "આ જ પ્રશ્ન boardમાં આવશે" એવું ન કહેવું.
-
-13) official GSEB Question Bankનો પુરાવો ન હોય તો
-Question Bankમાં ચોક્કસ છે એવું ન કહેવું.
-
-14) માહિતી ખાતરીથી ખબર ન હોય તો બનાવવી નહીં.
-
-
-==============================
-ગણિત
-==============================
+1. જવાબ સરળ અને સ્વાભાવિક ગુજરાતી ભાષામાં આપો.
+2. જરૂરી technical terms, formulas અને units Englishમાં રાખી શકો.
+3. વિદ્યાર્થી answer sheetમાં સીધો લખી શકે એવો જવાબ આપો.
+4. ફોટામાં પ્રશ્ન હોય તો ધ્યાનથી વાંચો.
+5. ફોટામાં એકથી વધુ સ્પષ્ટ પ્રશ્ન હોય તો બધા જવાબ આપો.
+6. અસ્પષ્ટ ભાગ હોય તો અંદાજ ન લગાવો.
+7. <think>, analysis, reasoning અથવા internal thinking ક્યારેય બતાવશો નહીં.
+8. "આ પ્રશ્ન ચોક્કસ boardમાં આવશે" એવું ન કહો.
+9. Question Bank અંગે પુરાવો ન હોય તો claim ન કરો.
 
 ગણિત હોય તો:
 
@@ -393,87 +394,38 @@ Question Bankમાં ચોક્કસ છે એવું ન કહેવ�
 ગણતરી
 અંતિમ જવાબ
 
-ક્રમમાં સમજાવો.
+આ ક્રમમાં આપો અને calculation ચકાસો.
 
-દરેક calculation ફરી ચકાસો.
+વિજ્ઞાનમાં વ્યાખ્યા, કારણ, પ્રક્રિયા અને મુદ્દા exam-friendly આપો.
 
-જરૂર હોય ત્યાં LaTeX વાપરો:
+સામાજિક વિજ્ઞાનમાં કારણ, પરિણામ, લક્ષણો, મહત્વ અને તફાવત મુદ્દાવાર આપો.
 
-\\( ... \\)
-
-અથવા:
-
-\\[ ... \\]
-
-Frequency, class interval, fi, xi, ui, fixi વગેરે હોય
-તો સાચી table બનાવો.
-
-
-==============================
-વિજ્ઞાન
-==============================
-
-વ્યાખ્યા, કારણ, પ્રક્રિયા, મુદ્દા, તફાવત અને
-સૂત્રો exam-friendly રીતે આપો.
-
-
-==============================
-સામાજિક વિજ્ઞાન
-==============================
-
-જવાબ મુદ્દાવાર આપો.
-
-જ્યાં જરૂરી હોય ત્યાં:
-કારણ
-પરિણામ
-લક્ષણો
-મહત્વ
-તફાવત
-
-
-==============================
-FINAL FORMAT
-==============================
+જવાબ આ formatમાં આપો:
 
 ## 💥 પ્રશ્નને સરળ રીતે સમજીએ
 
 1. પ્રશ્ન શું પૂછે છે?
-2. જરૂરી માહિતી
+2. જરૂરી માહિતી / concept
 3. પગલુંવાર સમજણ
 4. અંતિમ પરિણામ
-
 
 ## 📝 પરીક્ષામાં લખવાનો જવાબ
 
 Answer sheetમાં સીધો લખી શકાય એવો જવાબ.
 
-
 ## ⭐ મહત્વ
 
 Normal / Practice-important / Question-bank-related
 
-માત્ર યોગ્ય હોય ત્યારે લખવું.
-
+માત્ર યોગ્ય હોય ત્યારે લખો.
 
 ## ⚠️ ધ્યાનમાં રાખવું
 
 માત્ર 1 થી 3 મહત્વની tips.
 
-
-==============================
-FINAL REMINDER
-==============================
-
-કોઈ <think> નહીં.
-
+માત્ર final answer આપો.
 કોઈ internal reasoning નહીં.
-
-કોઈ AI planning નહીં.
-
-કોઈ English explanation નહીં.
-
 સરળ ગુજરાતી.
-
 GSEB ધોરણ 10 exam-friendly જવાબ.
 `;
 
@@ -484,8 +436,11 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
       const content = [
 
         {
+
           type: "text",
+
           text: prompt
+
         }
 
       ];
@@ -555,7 +510,8 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
                     role:
                       "user",
 
-                    content
+                    content:
+                      content
 
                   }
 
@@ -565,7 +521,7 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
                   0.3,
 
                 max_completion_tokens:
-                  8192,
+                  3000,
 
                 reasoning_effort:
                   "default",
@@ -583,14 +539,14 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
         );
 
       // ==================================================
-      // RESPONSE
+      // READ RESPONSE
       // ==================================================
 
       const data =
         await response.json();
 
       // ==================================================
-      // API ERROR
+      // GROQ ERROR
       // ==================================================
 
       if (!response.ok) {
@@ -601,12 +557,10 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
         );
 
         return res.status(
-
           response.status >= 400 &&
           response.status < 500
             ? response.status
             : 500
-
         ).json({
 
           error:
@@ -622,6 +576,7 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
       // ==================================================
 
       let answer =
+
         data
           ?.choices?.[0]
           ?.message
@@ -638,7 +593,7 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
       }
 
       // ==================================================
-      // USAGE COUNT
+      // USAGE
       // ==================================================
 
       let usedToday;
@@ -674,7 +629,7 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
       }
 
       // ==================================================
-      // FINAL RESPONSE
+      // RESPONSE
       // ==================================================
 
       return res.json({
@@ -682,7 +637,9 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
         success:
           true,
 
-        answer,
+        answer:
+
+          answer,
 
         usage: {
 
@@ -690,13 +647,18 @@ GSEB ધોરણ 10 exam-friendly જવાબ.
             !!hasFullAccess,
 
           dailyLimit:
+
             hasFullAccess
               ? "Unlimited"
               : FREE_LIMIT,
 
-          usedToday,
+          usedToday:
 
-          remainingToday
+            usedToday,
+
+          remainingToday:
+
+            remainingToday
 
         }
 
