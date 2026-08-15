@@ -45,7 +45,6 @@ const FULL_ACCESS_CODE =
 // ==================================================
 
 function getClientIp(req) {
-
   return (
     req.ip ||
     req.headers["x-forwarded-for"] ||
@@ -55,7 +54,6 @@ function getClientIp(req) {
     .toString()
     .split(",")[0]
     .trim();
-
 }
 
 // ==================================================
@@ -63,7 +61,6 @@ function getClientIp(req) {
 // ==================================================
 
 function getToday() {
-
   const now = new Date();
 
   return (
@@ -73,7 +70,6 @@ function getToday() {
     "-" +
     String(now.getUTCDate()).padStart(2, "0")
   );
-
 }
 
 // ==================================================
@@ -81,7 +77,6 @@ function getToday() {
 // ==================================================
 
 function getUsage(req) {
-
   const ip = getClientIp(req);
 
   const today = getToday();
@@ -92,7 +87,6 @@ function getUsage(req) {
     key,
     used: dailyUsage.get(key) || 0
   };
-
 }
 
 // ==================================================
@@ -100,7 +94,6 @@ function getUsage(req) {
 // ==================================================
 
 function getAccessMode(req) {
-
   const cookie =
     req.headers.cookie || "";
 
@@ -112,7 +105,6 @@ function getAccessMode(req) {
   return match
     ? decodeURIComponent(match[1])
     : "limited";
-
 }
 
 // ==================================================
@@ -120,7 +112,6 @@ function getAccessMode(req) {
 // ==================================================
 
 function cleanAnswer(text) {
-
   let answer =
     String(text || "");
 
@@ -143,7 +134,6 @@ function cleanAnswer(text) {
     );
 
   return answer.trim();
-
 }
 
 // ==================================================
@@ -151,7 +141,6 @@ function cleanAnswer(text) {
 // ==================================================
 
 app.get("/", (req, res) => {
-
   res.setHeader(
     "Set-Cookie",
     "access_mode=limited; Path=/; HttpOnly; SameSite=Lax"
@@ -160,7 +149,6 @@ app.get("/", (req, res) => {
   res.sendFile(
     path.join(process.cwd(), "full.html")
   );
-
 });
 
 // ==================================================
@@ -168,7 +156,6 @@ app.get("/", (req, res) => {
 // ==================================================
 
 app.get("/full", (req, res) => {
-
   res.setHeader(
     "Set-Cookie",
     "access_mode=full; Path=/; HttpOnly; SameSite=Lax"
@@ -177,7 +164,6 @@ app.get("/full", (req, res) => {
   res.sendFile(
     path.join(process.cwd(), "index.html")
   );
-
 });
 
 // ==================================================
@@ -185,9 +171,7 @@ app.get("/full", (req, res) => {
 // ==================================================
 
 app.get("/api/health", (req, res) => {
-
   res.json({
-
     success: true,
 
     service:
@@ -195,17 +179,17 @@ app.get("/api/health", (req, res) => {
 
     status:
       "running"
-
   });
-
 });
 
 // ==================================================
 // MAIN SOLVE API
+// IMPORTANT:
+// /api/solve AND /api/full-solve BOTH WORK
 // ==================================================
 
 app.post(
-  "/api/solve",
+  ["/api/solve", "/api/full-solve"],
   upload.single("image"),
   async (req, res) => {
 
