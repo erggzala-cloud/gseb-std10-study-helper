@@ -37,25 +37,7 @@ const GEMINI_API_KEY =
   process.env.GEMINI_API_KEY || "";
 
 const GEMINI_MODEL =
-  "gemini-2.5-flash";
-
-// ==================================================
-// GET CLIENT IP
-// ==================================================
-
-function getClientIp(req) {
-
-  return (
-    req.ip ||
-    req.headers["x-forwarded-for"] ||
-    req.socket.remoteAddress ||
-    "unknown"
-  )
-    .toString()
-    .split(",")[0]
-    .trim();
-
-}
+  "gemini-3.6-flash";
 
 // ==================================================
 // CLEAN GEMINI OUTPUT
@@ -66,7 +48,6 @@ function cleanAnswer(text) {
   let answer =
     String(text || "");
 
-  // Remove thinking tags if model ever returns them
   answer =
     answer.replace(
       /<think>[\s\S]*?<\/think>/gi,
@@ -155,7 +136,7 @@ analysis, planning અથવા AIની અંદરની પ્રક્ર�
 📚 જવાબનું FORMAT
 ==================================================
 
-જ્યાં યોગ્ય હોય ત્યાં નીચેનું structure જાળવો:
+જ્યાં યોગ્ય હોય ત્યાં નીચેનું structure જાળવો.
 
 
 ## 💥 પ્રશ્નને સરળ રીતે સમજીએ
@@ -304,15 +285,19 @@ diagram, science process અથવા system વિશે હોય,
 ① મુખ્ય ભાગ
 
 ↓
+
 ② આગળનો ભાગ
 
 ↓
+
 ③ તેની અંદર શું થાય છે
 
 ↓
+
 ④ આગળની પ્રક્રિયા
 
 ↓
+
 ⑤ અંતિમ પરિણામ
 
 દરેક ભાગનું કામ સરળ ગુજરાતી ભાષામાં સમજાવો.
@@ -409,10 +394,13 @@ app.get("/api/health", (req, res) => {
       "running",
 
     ai:
-      "Gemini 2.5 Flash",
+      "Gemini 3.6 Flash",
 
     access:
-      "Full Access"
+      "Full Access",
+
+    dailyLimit:
+      "Unlimited"
 
   });
 
@@ -510,7 +498,7 @@ async function solveWithGemini(
     }
 
     // ==================================================
-    // PROMPT
+    // MASTER PROMPT
     // ==================================================
 
     const prompt =
@@ -521,19 +509,20 @@ async function solveWithGemini(
       );
 
     // ==================================================
-    // GEMINI PARTS
+    // GEMINI CONTENT PARTS
     // ==================================================
 
     const parts = [
 
       {
-        text: prompt
+        text:
+          prompt
       }
 
     ];
 
     // ==================================================
-    // IMAGE
+    // IMAGE INPUT
     // ==================================================
 
     if (file) {
@@ -558,7 +547,7 @@ async function solveWithGemini(
     }
 
     // ==================================================
-    // GEMINI REQUEST
+    // GEMINI API REQUEST
     // ==================================================
 
     const response =
@@ -591,16 +580,14 @@ async function solveWithGemini(
                   role:
                     "user",
 
-                  parts
+                  parts:
+                    parts
 
                 }
 
               ],
 
               generationConfig: {
-
-                temperature:
-                  0.25,
 
                 maxOutputTokens:
                   4096
@@ -614,7 +601,7 @@ async function solveWithGemini(
       );
 
     // ==================================================
-    // GEMINI RESPONSE
+    // READ RESPONSE
     // ==================================================
 
     const data =
@@ -635,18 +622,6 @@ async function solveWithGemini(
         )
       );
 
-      let errorMessage =
-        "Gemini API માં સમસ્યા આવી.";
-
-      if (
-        data?.error?.message
-      ) {
-
-        errorMessage =
-          data.error.message;
-
-      }
-
       return res.status(
 
         response.status >= 400 &&
@@ -656,10 +631,12 @@ async function solveWithGemini(
 
       ).json({
 
-        success: false,
+        success:
+          false,
 
         error:
-          errorMessage
+          data?.error?.message ||
+          "Gemini API માં સમસ્યા આવી."
 
       });
 
@@ -669,7 +646,8 @@ async function solveWithGemini(
     // EXTRACT ANSWER
     // ==================================================
 
-    let answer = "";
+    let answer =
+      "";
 
     const candidates =
       data?.candidates || [];
@@ -756,7 +734,8 @@ async function solveWithGemini(
 
     return res.status(500).json({
 
-      success: false,
+      success:
+        false,
 
       error:
         "Serverમાં સમસ્યા આવી. થોડા સમય પછી ફરી પ્રયાસ કરો."
@@ -808,7 +787,7 @@ app.listen(
     );
 
     console.log(
-      "Access: Full / Unlimited app limit"
+      "Access: Full / Unlimited"
     );
 
   }
